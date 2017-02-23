@@ -17,8 +17,8 @@ namespace file_permission_conversion_comparison_front_creation
 
             // json設定ファイルの読み取り
             string json_file = "";
-            if (hash_array.ContainsKey(constant.RESOURCE_KEY_EXTERNAL))
-                json_file = hash_array[constant.RESOURCE_KEY_EXTERNAL];
+            if (hash_array.ContainsKey(constant.RESOURCES_KEY_EXTERNAL))
+                json_file = hash_array[constant.RESOURCES_KEY_EXTERNAL];
             else
                 json_file = constant.RESOURCES_DIR + constant.EXTERNAL_RESOURCE_FILENAME;
             json_module.setup(json_file);
