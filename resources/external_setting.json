@@ -1,0 +1,10 @@
+{
+    "log_file_encode" : "utf-8",
+    "default_log_filename" : "system.log",
+    
+    "error_file_encode" : "utf-8",
+    "default_error_filename" : "errors.log",
+    
+    "log_file_dir" : "./log/",
+    "export_dir" : "./export/",
+}
