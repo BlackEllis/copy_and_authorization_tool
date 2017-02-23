@@ -17,15 +17,15 @@ namespace file_permission_conversion_json_creation
 
             // json設定ファイルの読み取り
             string json_file = "";
-            if (hash_array.ContainsKey(constant.resource_key_external))
-                json_file = hash_array[constant.resource_key_external];
+            if (hash_array.ContainsKey(constant.RESOURCE_KEY_EXTERNAL))
+                json_file = hash_array[constant.RESOURCE_KEY_EXTERNAL];
             else
-                json_file = constant.resources_dir + constant.external_resource_filename;
+                json_file = constant.RESOURCES_DIR + constant.EXTERNAL_RESOURCE_FILENAME;
             json_module.setup(json_file);
 
             // 各外部ファイルのディレクトリ先を設定
-            string log_dir = get_value_from_json("log_file_dir", constant.log_file_dir);
-            string export_dir = get_value_from_json("export_dir", constant.export_dir);
+            string log_dir = get_value_from_json("log_file_dir", constant.LOG_FILE_DIR);
+            string export_dir = get_value_from_json("export_dir", constant.EXPORT_DIR);
 
             setup_logs(hash_array, log_dir); // ログ、エラーファイルのセットアップ
 
@@ -72,14 +72,14 @@ namespace file_permission_conversion_json_creation
         private static void setup_logs(Dictionary<string, string>args, string log_dir)
         {
             // ログファイルの関係設定
-            string log_file = get_value_from_json("default_log_filename", constant.default_log_filename);
-            log_file = get_value_from_hasharray(args, constant.resources_key_log, log_file);
-            string log_encode = get_value_from_json("log_file_encode", constant.log_file_encode);
+            string log_file = get_value_from_json("default_log_filename", constant.DEFAULT_LOG_FILENAME);
+            log_file = get_value_from_hasharray(args, constant.RESOURCES_KEY_LOG, log_file);
+            string log_encode = get_value_from_json("log_file_encode", constant.LOG_FILE_ENCODE);
 
             // エラーファイルの関係設定
-            string error_file = get_value_from_json("default_error_filename", constant.default_error_filename);
-            error_file = get_value_from_hasharray(args, constant.resources_key_errorlog, error_file);
-            string error_encode = get_value_from_json("error_file_encode", constant.error_file_encode);
+            string error_file = get_value_from_json("default_error_filename", constant.DEFAULT_ERROR_FILENAME);
+            error_file = get_value_from_hasharray(args, constant.RESOURCES_KEY_ERRORLOG, error_file);
+            string error_encode = get_value_from_json("error_file_encode", constant.ERROR_FILE_ENCODE);
 
 #if DEBUG
             loger_module.loger_setup(log_file, log_dir, log_encode, "info", true);
