@@ -9,11 +9,11 @@ namespace file_permission_conversion_comparison_front_creation
 {
     class active_direcory_module
     {
-        private static IDictionary<string, List<string>> _groupMembers;
+        private static IDictionary<string, List<user_info>> _group_members;
 
-        public IDictionary<string, List<string>> GroupMembers
+        public IDictionary<string, List<user_info>> GroupMembers
         {
-            get { return _groupMembers; }
+            get { return _group_members; }
         }
         public active_direcory_module() { }
 
@@ -53,8 +53,8 @@ namespace file_permission_conversion_comparison_front_creation
                 if (objSearchResults.Count == 0)
                     throw new Exception("No groups found");
 
-                if (_groupMembers == null)
-                    _groupMembers = new Dictionary<string, List<string>>();
+                if (_group_members == null)
+                    _group_members = new Dictionary<string, List<user_info>>();
 
                 foreach (SearchResult objResult in objSearchResults)
                 {
@@ -62,8 +62,8 @@ namespace file_permission_conversion_comparison_front_creation
                     objGroupEntry = objResult.GetDirectoryEntry();
                     var sid = new SecurityIdentifier((byte[])objGroupEntry.Properties["objectSid"][0], 0).ToString();
                     var group_name = objGroupEntry.Properties["sAMAccountName"].Value.ToString();
-                    if (!_groupMembers.ContainsKey(group_name))
-                        _groupMembers.Add(group_name, new List<string>());
+                    if (!_group_members.ContainsKey(group_name))
+                        _group_members.Add(group_name, new List<user_info>());
                     ExpandGroup(objGroupEntry, user, pass);
                 }
 
@@ -108,19 +108,16 @@ namespace file_permission_conversion_comparison_front_creation
                 {
                     foreach (SearchResult result in searchResultCollection)
                     {
-                        var obj_entry = result.GetDirectoryEntry();
-                        string sid = new SecurityIdentifier((byte[])obj_entry.Properties["objectSid"][0], 0).ToString();
-                        var obj_name = obj_entry.Properties["sAMAccountName"].Value;
-                        var disp_name = obj_entry.Properties["displayName"].Value;
+                        user_info user_obj = new user_info(result.GetDirectoryEntry());
                         ExpandGroup(create_entry_obj(result.Path, user, pass), user, pass);
                         var group_name = group.Properties["sAMAccountName"].Value.ToString();
-                        if (_groupMembers.ContainsKey(group_name))
+                        if (_group_members.ContainsKey(group_name))
                         {
-                            if (!_groupMembers[group_name].Contains(obj_name + ":" + disp_name + ":" + sid))
-                                _groupMembers[group_name].Add(obj_name + ":" + disp_name + ":" + sid);
+                            if (!_group_members[group_name].Contains(user_obj))
+                                _group_members[group_name].Add(user_obj);
                         }
                         else
-                            _groupMembers.Add(group_name, new List<string>() {obj_name + ":" + disp_name + ":" + sid});
+                            _group_members.Add(group_name, new List<user_info>() {user_obj});
                     }
                 }
             }
@@ -241,13 +238,13 @@ namespace file_permission_conversion_comparison_front_creation
         /// </summary>
         public void export_group_info()
         {
-            if ((_groupMembers != null) && (_groupMembers.Count != 0))
+            if ((_group_members != null) && (_group_members.Count != 0))
             {
-                foreach (KeyValuePair<string, List<string>> arrays in _groupMembers)
+                foreach (KeyValuePair<string, List<user_info>> arrays in _group_members)
                 {
                     loger_module.write_log(arrays.Key);
-                    foreach (string str in arrays.Value)
-                        loger_module.write_log("\t" + str);
+                    foreach (user_info obj in arrays.Value)
+                        obj.disp_parameters("\t");
                 }
                 loger_module.write_log("");
             }

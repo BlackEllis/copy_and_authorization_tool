@@ -7,30 +7,33 @@ using System.Security.Principal;
 
 namespace file_permission_conversion_comparison_front_creation.model
 {
-    class user_info
+    class user_info : IEquatable<user_info>
     {
         // Active Directoryのアカウント状態フラグ
-        private const int ADS_UF_SCRIPT = 1;                                         // 0x1
-        private const int ADS_UF_ACCOUNTDISABLE = 2;                                 // 0x2
-        private const int ADS_UF_HOMEDIR_REQUIRED = 8;                               // 0x8
-        private const int ADS_UF_LOCKOUT = 16;                                       // 0x10
-        private const int ADS_UF_PASSWD_NOTREQD = 32;                                // 0x20
-        private const int ADS_UF_PASSWD_CANT_CHANGE = 64;                            // 0x40
-        private const int ADS_UF_ENCRYPTED_TEXT_PASSWORD_ALLOWED = 128;              // 0x80
-        private const int ADS_UF_TEMP_DUPLICATE_ACCOUNT = 256;                       // 0x100
-        private const int ADS_UF_NORMAL_ACCOUNT = 512;                               // 0x200
-        private const int ADS_UF_INTERDOMAIN_TRUST_ACCOUNT = 2048;                   // 0x800
-        private const int ADS_UF_WORKSTATION_TRUST_ACCOUNT = 4096;                   // 0x1000
-        private const int ADS_UF_SERVER_TRUST_ACCOUNT = 8192;                        // 0x2000
-        private const int ADS_UF_DONT_EXPIRE_PASSWD = 65536;                         // 0x10000
-        private const int ADS_UF_MNS_LOGON_ACCOUNT = 131072;                         // 0x20000
-        private const int ADS_UF_SMARTCARD_REQUIRED = 262144;                        // 0x40000
-        private const int ADS_UF_TRUSTED_FOR_DELEGATION = 524288;                    // 0x80000
-        private const int ADS_UF_NOT_DELEGATED = 1048576;                            // 0x100000
-        private const int ADS_UF_USE_DES_KEY_ONLY = 2097152;                         // 0x200000
-        private const int ADS_UF_DONT_REQUIRE_PREAUTH = 4194304;                     // 0x400000
-        private const int ADS_UF_PASSWORD_EXPIRED = 8388608;                         // 0x800000
-        private const int ADS_UF_TRUSTED_TO_AUTHENTICATE_FOR_DELEGATION = 16777216;  // 0x1000000
+        enum ADS_UF : int
+        {
+            SCRIPT = 1,                                         // 0x1
+            ACCOUNTDISABLE = 2,                                 // 0x2
+            HOMEDIR_REQUIRED = 8,                               // 0x8
+            LOCKOUT = 16,                                       // 0x10
+            PASSWD_NOTREQD = 32,                                // 0x20
+            PASSWD_CANT_CHANGE = 64,                            // 0x40
+            ENCRYPTED_TEXT_PASSWORD_ALLOWED = 128,              // 0x80
+            TEMP_DUPLICATE_ACCOUNT = 256,                       // 0x100
+            NORMAL_ACCOUNT = 512,                               // 0x200
+            INTERDOMAIN_TRUST_ACCOUNT = 2048,                   // 0x800
+            WORKSTATION_TRUST_ACCOUNT = 4096,                   // 0x1000
+            SERVER_TRUST_ACCOUNT = 8192,                        // 0x2000
+            DONT_EXPIRE_PASSWD = 65536,                         // 0x10000
+            MNS_LOGON_ACCOUNT = 131072,                         // 0x20000
+            SMARTCARD_REQUIRED = 262144,                        // 0x40000
+            TRUSTED_FOR_DELEGATION = 524288,                    // 0x80000
+            NOT_DELEGATED = 1048576,                            // 0x100000
+            USE_DES_KEY_ONLY = 2097152,                         // 0x200000
+            DONT_REQUIRE_PREAUTH = 4194304,                     // 0x400000
+            PASSWORD_EXPIRED = 8388608,                         // 0x800000
+            TRUSTED_TO_AUTHENTICATE_FOR_DELEGATION = 16777216,  // 0x1000000
+        }
 
         public string account_name { get; }
         public string first_name { get; }
@@ -72,7 +75,7 @@ namespace file_permission_conversion_comparison_front_creation.model
                 else
                 {
                     int val = (int)set_obj.Properties["userAccountControl"].Value;
-                    if ((val & ADS_UF_ACCOUNTDISABLE) == ADS_UF_ACCOUNTDISABLE)   // 0x0002が立っている場合は無効
+                    if ((val & (int)ADS_UF.ACCOUNTDISABLE) == (int)ADS_UF.ACCOUNTDISABLE)   // 0x0002が立っている場合は無効
                         del_flg = 1; // 無効
                     else
                         del_flg = 0; // 有効
@@ -175,6 +178,17 @@ namespace file_permission_conversion_comparison_front_creation.model
                 loger_module.write_log(e.Message, "error", "info");
                 return null;
             }
+        }
+
+        /// <summary>
+        /// 同じ内容可比較
+        /// </summary>
+        /// <param name="comparison_source"></param>
+        /// <returns>同一であれば true 異なれば false</returns>
+        public bool Equals(user_info comparison_source)
+        {
+            if (comparison_source == null) return false;
+            return this.account_name == comparison_source.account_name;
         }
     }
 }
