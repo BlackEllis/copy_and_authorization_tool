@@ -9,11 +9,11 @@ namespace file_permission_conversion_comparison_front_creation
 {
     class active_direcory_module
     {
-        private static IDictionary<string, List<user_info>> _group_members;
+        private static IDictionary<string, group_info> groups;
 
-        public IDictionary<string, List<user_info>> GroupMembers
+        public IDictionary<string, group_info> groups_list
         {
-            get { return _group_members; }
+            get { return groups; }
         }
         public active_direcory_module() { }
 
@@ -53,8 +53,8 @@ namespace file_permission_conversion_comparison_front_creation
                 if (objSearchResults.Count == 0)
                     throw new Exception("No groups found");
 
-                if (_group_members == null)
-                    _group_members = new Dictionary<string, List<user_info>>();
+                if (groups == null)
+                    groups = new Dictionary<string, group_info>();
 
                 foreach (SearchResult objResult in objSearchResults)
                 {
@@ -62,8 +62,8 @@ namespace file_permission_conversion_comparison_front_creation
                     objGroupEntry = objResult.GetDirectoryEntry();
                     var sid = new SecurityIdentifier((byte[])objGroupEntry.Properties["objectSid"][0], 0).ToString();
                     var group_name = objGroupEntry.Properties["sAMAccountName"].Value.ToString();
-                    if (!_group_members.ContainsKey(group_name))
-                        _group_members.Add(group_name, new List<user_info>());
+                    if (!groups.ContainsKey(group_name))
+                        groups.Add(group_name, new group_info(group_name, sid));
                     ExpandGroup(objGroupEntry, user, pass);
                 }
 
@@ -110,14 +110,14 @@ namespace file_permission_conversion_comparison_front_creation
                     {
                         user_info user_obj = new user_info(result.GetDirectoryEntry());
                         ExpandGroup(create_entry_obj(result.Path, user, pass), user, pass);
+                        var sid = new SecurityIdentifier((byte[])group.Properties["objectSid"][0], 0).ToString();
                         var group_name = group.Properties["sAMAccountName"].Value.ToString();
-                        if (_group_members.ContainsKey(group_name))
+                        if (groups.ContainsKey(group_name))
                         {
-                            if (!_group_members[group_name].Contains(user_obj))
-                                _group_members[group_name].Add(user_obj);
+                            groups[group_name].add_user_info(user_obj);
                         }
                         else
-                            _group_members.Add(group_name, new List<user_info>() {user_obj});
+                            groups.Add(group_name, new group_info(group_name, sid, user_obj));
                     }
                 }
             }
@@ -238,12 +238,12 @@ namespace file_permission_conversion_comparison_front_creation
         /// </summary>
         public void export_group_info()
         {
-            if ((_group_members != null) && (_group_members.Count != 0))
+            if ((groups != null) && (groups.Count != 0))
             {
-                foreach (KeyValuePair<string, List<user_info>> arrays in _group_members)
+                foreach (KeyValuePair<string, group_info> arrays in groups)
                 {
                     loger_module.write_log(arrays.Key);
-                    foreach (user_info obj in arrays.Value)
+                    foreach (user_info obj in arrays.Value.group_members)
                         obj.disp_parameters("\t");
                 }
                 loger_module.write_log("");

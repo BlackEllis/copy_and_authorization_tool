@@ -64,13 +64,14 @@ namespace file_permission_conversion_comparison_front_creation.modules
                         if (values_list.Count > 1) dst_td.Rows.Add(row);
                     }
                 }
+
+                return dst_td;
             }
             catch (Exception e)
             {
                 loger_module.write_log(e.Message, "error", "info");
+                return null;
             }
-
-            return dst_td;
         }
 
         /// <summary>

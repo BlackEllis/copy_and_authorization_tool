@@ -55,7 +55,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="constant.cs" />
+    <Compile Include="model\ad_unit_base.cs" />
     <Compile Include="model\comparison_table.cs" />
+    <Compile Include="model\group_info.cs" />
     <Compile Include="model\user_info.cs" />
     <Compile Include="modules\active_direcory_module.cs" />
     <Compile Include="modules\character_conversion.cs" />

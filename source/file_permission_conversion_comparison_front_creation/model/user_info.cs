@@ -7,7 +7,7 @@ using System.Security.Principal;
 
 namespace file_permission_conversion_comparison_front_creation.model
 {
-    class user_info : IEquatable<user_info>
+    public class user_info : ad_unit_base, IEquatable<user_info>
     {
         // Active Directoryのアカウント状態フラグ
         enum ADS_UF : int
@@ -35,13 +35,11 @@ namespace file_permission_conversion_comparison_front_creation.model
             TRUSTED_TO_AUTHENTICATE_FOR_DELEGATION = 16777216,  // 0x1000000
         }
 
-        public string account_name { get; }
         public string first_name { get; }
         public string last_name { get; }
         public string mailaddress { get; }
         public string affiliation { get; }
         public string job_title { get; }
-        public string sid { get; }
         public int del_flg { get; }
 
         /// <summary>

@@ -5,6 +5,7 @@ using file_permission_conversion_comparison_front_creation.model;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace file_permission_conversion_comparison_front_creation
 {
@@ -26,9 +27,19 @@ namespace file_permission_conversion_comparison_front_creation
             // 各外部ファイルのディレクトリ先を設定
             string log_dir = get_value_from_json("log_file_dir", constant.LOG_FILE_DIR);
             string export_dir = get_value_from_json("export_dir", constant.EXPORT_DIR);
+            string resources_dir = get_value_from_hasharray(hash_array, "RESOURCES_DIR", constant.RESOURCES_DIR);
 
             setup_logs(hash_array, log_dir); // ログ、エラーファイルのセットアップ
 
+            comparison_table compari_table = default(comparison_table);
+
+            var data_table = get_excel_data(resources_dir);
+            if (data_table != null)
+                compari_table = create_comparison_data(data_table);
+
+            // XMLへシリアライズ変換し出力
+            export_serialize(compari_table, export_dir, "temp.xml");
+            
             loger_module.close();
             Console.WriteLine("press any key to exit.");
             Console.ReadKey();
@@ -106,11 +117,11 @@ namespace file_permission_conversion_comparison_front_creation
             // ADからグループ
             var ad_obj = new active_direcory_module();
 
-            string ad_server_name = get_value_from_json("ad_server_name");
-            string ad_access_userid = get_value_from_json("ad_access_userid");
-            string ad_access_userpw = get_value_from_json("ad_access_userpw");
-            string ad_common_names = get_value_from_json("ad_common_names");
-            string ad_organizational_units = get_value_from_json("ad_organizational_units");
+            string ad_server_name = get_value_from_json("ad_server");
+            string ad_access_userid = get_value_from_json("access_userid");
+            string ad_access_userpw = get_value_from_json("access_passwd");
+            string ad_common_names = get_value_from_json("common_names");
+            string ad_organizational_units = get_value_from_json("organizational_units");
 
             ad_obj.get_group_list(ad_server_name, isolat_from_str(ad_common_names, ','), isolat_from_str(ad_organizational_units, '\''), ad_access_userid, ad_access_userpw);
 
@@ -125,11 +136,110 @@ namespace file_permission_conversion_comparison_front_creation
         {
             string db_host = get_value_from_json("db_server_name");
             string db_name = get_value_from_json("db_name");
-            string db_user = get_value_from_json("db_user_name");
-            string db_pass = get_value_from_json("db_pass_word");
+            string db_user = get_value_from_json("db_userid");
+            string db_pass = get_value_from_json("db_passwd");
             mysql_module mysql_connecer = mysql_module.setup_sql(db_host, db_name, db_user, db_pass);
 
             return mysql_connecer;
+        }
+
+        /// <summary>
+        /// Excelファイルの読み取り
+        /// </summary>
+        /// <param name="resources_dir">リソースディレクトリ</param>
+        /// <returns></returns>
+        private static DataTable get_excel_data(string resources_dir)
+        {
+            string resource_excel_fail = get_value_from_json("resource_excel_fail");
+            string open_sheet_name = get_value_from_json("open_sheet_name");
+            string open_list_offset = get_value_from_json("open_list_offset");
+
+            return excel_converter_module.read_excel_by_row(resource_excel_fail, resources_dir, open_sheet_name, int.Parse(open_list_offset));
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns></returns>
+        private static comparison_table create_comparison_data(DataTable group_list)
+        {
+            comparison_table compari_table = new comparison_table();
+
+            var ad_obj = get_ad_object();
+            var mysql = create_mysql_module();
+
+           foreach (KeyValuePair<string, group_info> ad_group_membars in ad_obj.groups_list)
+            {
+                // グループ情報の追加
+                string query_str = $"Name = '{ad_group_membars.Key}'";
+                DataRow[] result_rows = group_list.Select(query_str);
+                if (result_rows.Length > 0)
+                {
+                    foreach (var result_row in result_rows)
+                    {
+                        try
+                        {
+                            comparsion_unit unit = new comparsion_unit();
+                            unit.account_name = result_row["SamAccountName"].ToString();
+                            unit.source_sid = ad_group_membars.Value.sid;
+                            unit.target_sid = result_row["SID"].ToString();
+
+                            if (!compari_table.comparsion_units.Contains(unit))
+                                compari_table.comparsion_units.Add(unit);
+                        }
+                        catch (Exception e)
+                        {
+                            loger_module.write_log(e.Message, "error", "ifno");
+                        }
+                    }
+                }
+
+                if (ad_group_membars.Value.group_members.Count == 0) continue;
+
+                // ユーザー毎に追加処理
+                foreach (user_info membar_user in ad_group_membars.Value.group_members)
+                {
+                    try
+                    {
+                        var users = user_info.get_user_infos(mysql.connection_sql_str(), membar_user.account_name);
+                        if ((users == null) || (users.Count == 0)) continue;
+
+                        comparsion_unit unit = new comparsion_unit(membar_user, users[0]);
+                        if (!compari_table.comparsion_units.Contains(unit))
+                            compari_table.comparsion_units.Add(unit);
+                    }
+                    catch (Exception e)
+                    {
+                        loger_module.write_log(e.Message, "error", "ifno");
+                    }
+                }
+            }
+
+            return compari_table;
+        }
+
+
+        private static void export_serialize(comparison_table com_table, string export_dir, string export_filename)
+        {
+            try
+            {
+                if (com_table == null) throw new Exception("comparison_table 引数が未定義");
+                if (!Directory.Exists(export_dir)) Directory.CreateDirectory(export_dir); // ディレクトが無ければ作成
+
+                string output_filename = export_dir + export_filename;
+                using (StreamWriter write_stream = new StreamWriter(output_filename, false, Encoding.GetEncoding(constant.EXTERNAL_RESOURCE_ENCODE)))
+                {
+                    System.Xml.Serialization.XmlSerializer serializer = new System.Xml.Serialization.XmlSerializer(typeof(comparison_table));
+                    serializer.Serialize(write_stream, com_table);
+
+                    write_stream.Flush();
+                }
+            }
+            catch (Exception e)
+            {
+                loger_module.write_log(e.Message, "error", "ifno");
+            }
+
         }
 
         /// <summary>
@@ -140,7 +250,7 @@ namespace file_permission_conversion_comparison_front_creation
         private static List<string> create_exception_targets(char delimiter)
         {
             string exception_targets = get_value_from_json("exception_targets", "");
-            return exception_targets.Split(delimiter).ToList<string>();            
+            return exception_targets.Split(delimiter).ToList<string>();
         }
 
     }

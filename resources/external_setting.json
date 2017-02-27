@@ -19,4 +19,9 @@
     "db_userid" : "",
     "db_passwd" : "",
 
+    "resource_excel_fail" : "",
+    "open_sheet_name" : "",
+    "open_list_offset" : "",
+
+    "export_xml_filename" : "comparison_file.xml",
 }

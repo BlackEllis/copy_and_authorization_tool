@@ -37,8 +37,8 @@ namespace file_permission_conversion_comparison_front_creation.modules
                     log_file_name = create_log_filename(file_name, debug_flg);
 
                 if (!Directory.Exists(log_dir)) Directory.CreateDirectory(log_dir); // ディレクトが無ければ作成
-                    st_write_obj = new System.IO.StreamWriter(log_file_name, true, Encoding.GetEncoding(file_encode));
 
+                st_write_obj = new StreamWriter(log_file_name, true, Encoding.GetEncoding(file_encode));
                 _stream_list.Add(log_category, st_write_obj);
             }
             catch (Exception e)
@@ -69,7 +69,7 @@ namespace file_permission_conversion_comparison_front_creation.modules
         public static void write_log(string str="", string log_category = "info", string replace_category="")
         {
             // ログ出力 ラムダ関数
-            Func<System.IO.StreamWriter, string, bool> write_log = (System.IO.StreamWriter st_write, string category) => {
+            Func<System.IO.StreamWriter, string, bool> write_log = (StreamWriter st_write, string category) => {
                 try
                 {
                     if (str != "")
@@ -85,14 +85,14 @@ namespace file_permission_conversion_comparison_front_creation.modules
                 }
                 catch (Exception e)
                 {
-                    System.Console.WriteLine(e.Message);
+                    Console.WriteLine(e.Message);
                     return false;
                 }
             };
 
             if ((_stream_list == null) || (_stream_list.Count == 0))
             {
-                System.Console.WriteLine(str); // ログ出力オブジェクトがない場合はコンソールに表示
+                Console.WriteLine(str); // ログ出力オブジェクトがない場合はコンソールに表示
                 return;
             }
 
