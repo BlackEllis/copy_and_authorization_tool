@@ -1,1 +1,4 @@
-# copy_and_authorization_tool
+# S-ID対比作成ツール
+
+## 概要
+異なるAD同士のS-ID対比Xml作成プログラム
