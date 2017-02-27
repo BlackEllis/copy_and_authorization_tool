@@ -4,7 +4,7 @@ using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Xml;
 
-namespace file_permission_conversion_json_creation.modules
+namespace file_permission_conversion_comparison_front_creation.modules
 {
     class json_module
     {

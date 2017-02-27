@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using file_permission_conversion_json_creation.modules;
-using file_permission_conversion_json_creation.model;
+using file_permission_conversion_comparison_front_creation.modules;
+using file_permission_conversion_comparison_front_creation.model;
 using System.Data;
 using System.IO;
 using System.Linq;
 
-namespace file_permission_conversion_json_creation
+namespace file_permission_conversion_comparison_front_creation
 {
     class Program
     {

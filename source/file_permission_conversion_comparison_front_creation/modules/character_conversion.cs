@@ -1,4 +1,4 @@
-﻿namespace file_permission_conversion_json_creation.modules
+﻿namespace file_permission_conversion_comparison_front_creation.modules
 {
     class character_conversion
     {

@@ -1,11 +1,11 @@
-﻿using file_permission_conversion_json_creation.model;
-using file_permission_conversion_json_creation.modules;
+﻿using file_permission_conversion_comparison_front_creation.model;
+using file_permission_conversion_comparison_front_creation.modules;
 using System;
 using System.Collections.Generic;
 using System.DirectoryServices;
 using System.Security.Principal;
 
-namespace file_permission_conversion_json_creation
+namespace file_permission_conversion_comparison_front_creation
 {
     class active_direcory_module
     {

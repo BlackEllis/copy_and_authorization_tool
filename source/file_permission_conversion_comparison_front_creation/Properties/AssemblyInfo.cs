@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // アセンブリに関する一般情報は以下の属性セットをとおして制御されます。
 // アセンブリに関連付けられている情報を変更するには、
 // これらの属性値を変更してください。
-[assembly: AssemblyTitle("file_permission_conversion_json_creation")]
-[assembly: AssemblyDescription("file_permission_conversion_json_creation")]
+[assembly: AssemblyTitle("file_permission_conversion_comparison_front_creation")]
+[assembly: AssemblyDescription("file_permission_conversion_comparison_front_creation")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("BlackEllis")]
-[assembly: AssemblyProduct("file_permission_conversion_json_creation")]
+[assembly: AssemblyProduct("file_permission_conversion_comparison_front_creation")]
 [assembly: AssemblyCopyright("Copyright © 2017 BlackEllis")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

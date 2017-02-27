@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace file_permission_conversion_json_creation.modules
+namespace file_permission_conversion_comparison_front_creation.modules
 {
     sealed class loger_module
     {

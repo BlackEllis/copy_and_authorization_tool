@@ -1,11 +1,11 @@
-﻿using file_permission_conversion_json_creation.modules;
+﻿using file_permission_conversion_comparison_front_creation.modules;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
 using System.DirectoryServices;
 using System.Security.Principal;
 
-namespace file_permission_conversion_json_creation.model
+namespace file_permission_conversion_comparison_front_creation.model
 {
     class user_info
     {

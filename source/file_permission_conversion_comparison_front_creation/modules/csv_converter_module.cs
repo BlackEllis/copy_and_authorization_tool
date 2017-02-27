@@ -4,9 +4,9 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using file_permission_conversion_json_creation.modules;
+using file_permission_conversion_comparison_front_creation.modules;
 
-namespace file_permission_conversion_json_creation
+namespace file_permission_conversion_comparison_front_creation
 {
     class csv_converter_module : character_conversion
     {

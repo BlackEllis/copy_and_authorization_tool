@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace file_permission_conversion_json_creation.modules
+namespace file_permission_conversion_comparison_front_creation.modules
 {
     class mysql_module
     {

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace file_permission_conversion_json_creation
+namespace file_permission_conversion_comparison_front_creation
 {
     class utility_tools
     {
