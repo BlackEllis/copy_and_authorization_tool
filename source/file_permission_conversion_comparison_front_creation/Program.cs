@@ -150,11 +150,19 @@ namespace file_permission_conversion_comparison_front_creation
         /// <returns></returns>
         private static DataTable get_excel_data(string resources_dir)
         {
-            string resource_excel_fail = get_value_from_json("resource_excel_fail");
-            string open_sheet_name = get_value_from_json("open_sheet_name");
-            string open_list_offset = get_value_from_json("open_list_offset");
+            try
+            {
+                string resource_excel_fail = get_value_from_json("resource_excel_fail");
+                string open_sheet_name = get_value_from_json("open_sheet_name");
+                string open_list_offset = get_value_from_json("open_list_offset");
 
-            return excel_converter_module.read_excel_by_row(resource_excel_fail, resources_dir, open_sheet_name, int.Parse(open_list_offset));
+                return excel_converter_module.read_excel_by_row(resource_excel_fail, resources_dir, open_sheet_name, int.Parse(open_list_offset));
+            }
+            catch (Exception e)
+            {
+                loger_module.write_log(e.Message, "error", "info");
+                return null;
+            }
         }
 
         /// <summary>
