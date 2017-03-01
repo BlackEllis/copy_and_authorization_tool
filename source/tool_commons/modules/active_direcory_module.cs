@@ -1,11 +1,11 @@
-﻿using comparison_front_creating_tool.model;
-using comparison_front_creating_tool.modules;
+﻿using tool_commons.model;
+using tool_commons.modules;
 using System;
 using System.Collections.Generic;
 using System.DirectoryServices;
 using System.Security.Principal;
 
-namespace comparison_front_creating_tool
+namespace tool_commons.modules
 {
     class active_direcory_module
     {

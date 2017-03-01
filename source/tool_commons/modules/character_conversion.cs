@@ -1,4 +1,4 @@
-﻿namespace comparison_front_creating_tool.modules
+﻿namespace tool_commons.modules
 {
     class character_conversion
     {

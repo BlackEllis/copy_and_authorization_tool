@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace comparison_front_creating_tool.modules
+namespace tool_commons.modules
 {
     sealed class loger_module
     {

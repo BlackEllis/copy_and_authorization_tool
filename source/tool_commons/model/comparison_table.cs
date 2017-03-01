@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace comparison_front_creating_tool.model
+namespace tool_commons.model
 {
     [System.Xml.Serialization.XmlRoot("comparison_table")]
     public class comparison_table

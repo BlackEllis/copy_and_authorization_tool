@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>879e9ea9-dee8-47f9-a8b8-6bde84052dc2</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>tool_commons</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)model\ad_unit_base.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)model\comparison_table.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)model\group_info.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)model\user_info.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)modules\active_direcory_module.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)modules\character_conversion.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)modules\csv_converter_module.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)modules\excel_converter_module.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)modules\json_module.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)modules\loger_module.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)modules\mysql_module.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)modules\utility_tools.cs" />
+  </ItemGroup>
+</Project>

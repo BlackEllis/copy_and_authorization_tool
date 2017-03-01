@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace comparison_front_creating_tool.model
+﻿namespace tool_commons.model
 {
     public class ad_unit_base
     {
         // Active Directoryのアカウント状態フラグ
-        enum ADS_UF : int
+        public enum ADS_UF : int
         {
             SCRIPT = 1,                                         // 0x1
             ACCOUNTDISABLE = 2,                                 // 0x2

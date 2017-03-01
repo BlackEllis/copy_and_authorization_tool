@@ -4,7 +4,7 @@ using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Xml;
 
-namespace comparison_front_creating_tool.modules
+namespace tool_commons.modules
 {
     class json_module
     {

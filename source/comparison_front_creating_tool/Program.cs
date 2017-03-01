@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using comparison_front_creating_tool.modules;
-using comparison_front_creating_tool.model;
 using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
+using tool_commons.model;
+using tool_commons.modules;
 
 namespace comparison_front_creating_tool
 {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace comparison_front_creating_tool.modules
+namespace tool_commons.modules
 {
     class mysql_module
     {

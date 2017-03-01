@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace comparison_front_creating_tool
+namespace tool_commons.modules
 {
     class utility_tools
     {

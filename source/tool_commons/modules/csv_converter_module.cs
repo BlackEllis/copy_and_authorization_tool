@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using comparison_front_creating_tool.modules;
+using tool_commons.modules;
 
-namespace comparison_front_creating_tool
+namespace tool_commons
 {
     class csv_converter_module : character_conversion
     {
