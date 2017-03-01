@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace file_permission_conversion_comparison_front_creation.model
+namespace comparison_front_creating_tool.model
 {
     public class ad_unit_base
     {

@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "file_permission_conversion_comparison_front_creation", "file_permission_conversion_comparison_front_creation\file_permission_conversion_comparison_front_creation.csproj", "{7C1612E1-93A0-4730-8848-C85CCE97EAC5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "comparison_front_creating_tool", "comparison_front_creating_tool\comparison_front_creating_tool.csproj", "{7C1612E1-93A0-4730-8848-C85CCE97EAC5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,11 +1,11 @@
-﻿using file_permission_conversion_comparison_front_creation.modules;
+﻿using comparison_front_creating_tool.modules;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
 using System.DirectoryServices;
 using System.Security.Principal;
 
-namespace file_permission_conversion_comparison_front_creation.model
+namespace comparison_front_creating_tool.model
 {
     public class user_info : ad_unit_base, IEquatable<user_info>
     {

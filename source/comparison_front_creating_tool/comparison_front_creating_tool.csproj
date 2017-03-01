@@ -7,8 +7,8 @@
     <ProjectGuid>{7C1612E1-93A0-4730-8848-C85CCE97EAC5}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>file_permission_conversion_comparison_front_creation</RootNamespace>
-    <AssemblyName>file_permission_conversion_comparison_front_creation</AssemblyName>
+    <RootNamespace>copy_and_authorization_tool</RootNamespace>
+    <AssemblyName>copy_and_authorization_tool</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

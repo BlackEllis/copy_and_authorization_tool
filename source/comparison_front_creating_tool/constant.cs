@@ -1,4 +1,4 @@
-﻿namespace file_permission_conversion_comparison_front_creation
+﻿namespace comparison_front_creating_tool
 {
     class constant
     {

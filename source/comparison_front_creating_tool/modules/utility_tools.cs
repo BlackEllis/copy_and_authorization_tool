@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace file_permission_conversion_comparison_front_creation
+namespace comparison_front_creating_tool
 {
     class utility_tools
     {

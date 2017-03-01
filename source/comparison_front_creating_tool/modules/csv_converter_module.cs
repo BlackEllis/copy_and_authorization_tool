@@ -4,9 +4,9 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using file_permission_conversion_comparison_front_creation.modules;
+using comparison_front_creating_tool.modules;
 
-namespace file_permission_conversion_comparison_front_creation
+namespace comparison_front_creating_tool
 {
     class csv_converter_module : character_conversion
     {

@@ -1,11 +1,11 @@
-﻿using file_permission_conversion_comparison_front_creation.model;
-using file_permission_conversion_comparison_front_creation.modules;
+﻿using comparison_front_creating_tool.model;
+using comparison_front_creating_tool.modules;
 using System;
 using System.Collections.Generic;
 using System.DirectoryServices;
 using System.Security.Principal;
 
-namespace file_permission_conversion_comparison_front_creation
+namespace comparison_front_creating_tool
 {
     class active_direcory_module
     {

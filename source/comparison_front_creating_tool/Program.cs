@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using file_permission_conversion_comparison_front_creation.modules;
-using file_permission_conversion_comparison_front_creation.model;
+using comparison_front_creating_tool.modules;
+using comparison_front_creating_tool.model;
 using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace file_permission_conversion_comparison_front_creation
+namespace comparison_front_creating_tool
 {
     class Program
     {

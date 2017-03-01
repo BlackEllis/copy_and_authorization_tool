@@ -4,7 +4,7 @@ using System.Linq;
 using System.Data;
 using ClosedXML.Excel;
 
-namespace file_permission_conversion_comparison_front_creation.modules
+namespace comparison_front_creating_tool.modules
 {
     class excel_converter_module : character_conversion
     {
