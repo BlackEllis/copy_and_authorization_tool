@@ -71,13 +71,12 @@ namespace tool_commons.modules
             Func<System.IO.StreamWriter, string, bool> write_log = (StreamWriter st_write, string category) => {
                 try
                 {
-                    if (str != "")
-                    {
-                        var write_str = (!category.Equals("")) ? category + ": " : "";
-                        write_str += str;
-                        st_write.Write(write_str);
-                        st_write.Flush();
-                    }
+                    if (str == "") return true;
+
+                    var write_str = (!category.Equals("")) ? category + ": " : "";
+                    write_str += str;
+                    st_write.Write(write_str);
+                    st_write.Flush();
                     st_write.WriteLine();
 
                     return true;
