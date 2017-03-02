@@ -16,31 +16,42 @@ namespace comparison_front_creating_tool
             // 起動引数からパラメータ毎に切り分けた連想配列を生成
             Dictionary<string, string> hash_array = utility_tools.argument_decomposition(args);
 
-            // json設定ファイルの読み取り
-            string json_file = "";
-            if (hash_array.ContainsKey(constant.RESOURCES_KEY_EXTERNAL))
-                json_file = hash_array[constant.RESOURCES_KEY_EXTERNAL];
-            else
-                json_file = constant.RESOURCES_DIR + constant.EXTERNAL_RESOURCE_FILENAME;
-            json_module.setup(json_file);
+            try
+            {
+                // json設定ファイルの読み取り
+                string json_file = "";
+                if (hash_array.ContainsKey(constant.RESOURCES_KEY_EXTERNAL))
+                    json_file = hash_array[constant.RESOURCES_KEY_EXTERNAL];
+                else
+                    json_file = constant.RESOURCES_DIR + constant.EXTERNAL_RESOURCE_FILENAME;
+                json_module.setup(json_file);
 
-            // 各外部ファイルのディレクトリ先を設定
-            string log_dir = get_value_from_json("log_file_dir", constant.LOG_FILE_DIR);
-            string export_dir = get_value_from_json("export_dir", constant.EXPORT_DIR);
-            string resources_dir = get_value_from_hasharray(hash_array, "RESOURCES_DIR", constant.RESOURCES_DIR);
+                // 各外部ファイルのディレクトリ先を設定
+                string log_dir = get_value_from_json("log_file_dir", constant.LOG_FILE_DIR);
+                string export_dir = get_value_from_json("export_dir", constant.EXPORT_DIR);
+                string resources_dir = get_value_from_hasharray(hash_array, "RESOURCES_DIR", constant.RESOURCES_DIR);
 
-            setup_logs(hash_array, log_dir); // ログ、エラーファイルのセットアップ
+                setup_logs(hash_array, log_dir); // ログ、エラーファイルのセットアップ
 
-            comparison_table compari_table = default(comparison_table);
+                comparison_table compari_table = default(comparison_table);
 
-            var data_table = get_excel_data(resources_dir);
-            if (data_table != null)
-                compari_table = create_comparison_data(data_table);
+                var data_table = get_excel_data(resources_dir);
+                if (data_table != null)
+                    compari_table = create_comparison_data(data_table);
 
-            // XMLへシリアライズ変換し出力
-            export_serialize(compari_table, export_dir, "temp.xml");
-            
-            loger_module.close();
+                string export_filename = get_value_from_json("export_xml_filename");
+                if (export_filename == "") throw new Exception("出力ファイル名が未定義");
+
+                // XMLへシリアライズ変換し出力
+                export_serialize(compari_table, export_dir, "temp.xml");
+
+                loger_module.close();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+
+            }
             Console.WriteLine("press any key to exit.");
             Console.ReadKey();
         }
@@ -134,13 +145,21 @@ namespace comparison_front_creating_tool
         /// <returns>SQL接続用モジュールオブジェクト</returns>
         private static mysql_module create_mysql_module()
         {
-            string db_host = get_value_from_json("db_server_name");
-            string db_name = get_value_from_json("db_name");
-            string db_user = get_value_from_json("db_userid");
-            string db_pass = get_value_from_json("db_passwd");
-            mysql_module mysql_connecer = mysql_module.setup_sql(db_host, db_name, db_user, db_pass);
+            try
+            {
+                string db_host = get_value_from_json("db_server_name");
+                string db_name = get_value_from_json("db_name");
+                string db_user = get_value_from_json("db_userid");
+                string db_pass = get_value_from_json("db_passwd");
+                mysql_module mysql_connecer = mysql_module.setup_sql(db_host, db_name, db_user, db_pass);
 
-            return mysql_connecer;
+                return mysql_connecer;
+            }
+            catch (Exception e)
+            {
+                loger_module.write_log(e.Message, "error", "info");
+                return null;
+            }
         }
 
         /// <summary>
@@ -166,7 +185,7 @@ namespace comparison_front_creating_tool
         }
 
         /// <summary>
-        ///
+        /// シリアライズ元データ作成関数
         /// </summary>
         /// <returns></returns>
         private static comparison_table create_comparison_data(DataTable group_list)
@@ -226,7 +245,12 @@ namespace comparison_front_creating_tool
             return compari_table;
         }
 
-
+        /// <summary>
+        /// XMLファイルへシリアライズ変換し出力関数
+        /// </summary>
+        /// <param name="com_table">シリアライズ元データ</param>
+        /// <param name="export_dir">出力ディレクトリ</param>
+        /// <param name="export_filename">出力ファイル名</param>
         private static void export_serialize(comparison_table com_table, string export_dir, string export_filename)
         {
             try
@@ -237,8 +261,13 @@ namespace comparison_front_creating_tool
                 string output_filename = export_dir + export_filename;
                 using (StreamWriter write_stream = new StreamWriter(output_filename, false, Encoding.GetEncoding(constant.EXTERNAL_RESOURCE_ENCODE)))
                 {
+                    // 名前空間の抑制
+                    System.Xml.Serialization.XmlSerializerNamespaces serialize_ns = new System.Xml.Serialization.XmlSerializerNamespaces();
+                    serialize_ns.Add(string.Empty, string.Empty);
+
+                    // シリアライズ処理
                     System.Xml.Serialization.XmlSerializer serializer = new System.Xml.Serialization.XmlSerializer(typeof(comparison_table));
-                    serializer.Serialize(write_stream, com_table);
+                    serializer.Serialize(write_stream, com_table, serialize_ns);
 
                     write_stream.Flush();
                 }
@@ -249,17 +278,5 @@ namespace comparison_front_creating_tool
             }
 
         }
-
-        /// <summary>
-        /// Jsonファイルに記述されている例外対象を判定する為のListを生成
-        /// </summary>
-        /// <param name="delimiter">区切り文字</param>
-        /// <returns>例外対象のリスト</returns>
-        private static List<string> create_exception_targets(char delimiter)
-        {
-            string exception_targets = get_value_from_json("exception_targets", "");
-            return exception_targets.Split(delimiter).ToList<string>();
-        }
-
     }
 }
