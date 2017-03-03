@@ -19,21 +19,23 @@ namespace comparison_front_creating_tool
             try
             {
                 // json設定ファイルの読み取り
+                Console.WriteLine("read setting from json : start");
                 string json_file = "";
                 if (hash_array.ContainsKey(constant.RESOURCES_KEY_EXTERNAL))
                     json_file = hash_array[constant.RESOURCES_KEY_EXTERNAL];
                 else
                     json_file = constant.RESOURCES_DIR + constant.EXTERNAL_RESOURCE_FILENAME;
                 json_module.setup(json_file);
+                Console.WriteLine("read setting from json : end");
 
                 // 各外部ファイルのディレクトリ先を設定
                 string log_dir = get_value_from_json("log_file_dir", constant.LOG_FILE_DIR);
                 string export_dir = get_value_from_json("export_dir", constant.EXPORT_DIR);
                 string resources_dir = get_value_from_hasharray(hash_array, "RESOURCES_DIR", constant.RESOURCES_DIR);
 
-                Console.WriteLine("read setting from json : start");
+                Console.WriteLine("setup log module : start");
                 setup_logs(hash_array, log_dir); // ログ、エラーファイルのセットアップ
-                Console.WriteLine("read setting from json : end");
+                Console.WriteLine("setup log module : end");
 
                 comparison_table compari_table = default(comparison_table);
 
