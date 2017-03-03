@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using tool_commons.model;
@@ -16,6 +17,7 @@ namespace copy_and_authorization_tool
 
             try
             {
+                Console.WriteLine("read setting from json : start");
                 string json_file = "";
                 if (hash_array.ContainsKey(constant.RESOURCES_KEY_EXTERNAL))
                     json_file = hash_array[constant.RESOURCES_KEY_EXTERNAL];
@@ -28,15 +30,27 @@ namespace copy_and_authorization_tool
                 string export_dir = get_value_from_json("export_dir", constant.EXPORT_DIR);
                 string resources_dir = get_value_from_hasharray(hash_array, "RESOURCES_DIR", constant.RESOURCES_DIR);
 
+                Console.WriteLine("read setting from json : start");
                 setup_logs(hash_array, log_dir); // ログ、エラーファイルのセットアップ
+                Console.WriteLine("read setting from json : end");
+
+                // デシリアライズした結果を連想配列に格納
+                Console.WriteLine("deserialize to Dictionary : start");
+                var comparison_list = inport_serialize(get_value_from_json("inport_xml_filename"), resources_dir)?.transform_to_dictionary();
+                Console.WriteLine("deserialize to Dictionary : end");
+
+                // ロボコピー実行関数
+                Console.WriteLine("run robocopy process : start");
+                robocopy_process(src_dir:"", dst_dir:"");
+                Console.WriteLine("run robocopy process : end");
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
 
             }
-            Console.WriteLine("press any key to exit.");
-            Console.ReadKey();
+            //Console.WriteLine("press any key to exit.");
+            //Console.ReadKey();
         }
 
 
@@ -117,6 +131,40 @@ namespace copy_and_authorization_tool
             {
                 loger_module.write_log(e.Message, "error", "info");
                 return null;
+            }
+        }
+
+        /// <summary>
+        /// ロボコピー実行関数
+        /// </summary>
+        /// <param name="src_dir">コピー元ディレクト</param>
+        /// <param name="dst_dir">コピー先ディレクトリ</param>
+        /// <param name="copy_filter">コピーフィルター</param>
+        private static void robocopy_process(string src_dir, string dst_dir, string copy_filter="")
+        {
+            try
+            {
+                if (src_dir.Equals("") || dst_dir.Equals("")) return;
+                if (copy_filter.Equals("")) copy_filter = "*.*";
+
+                using (Process p = new Process())
+                {
+                    p.StartInfo.Arguments = string.Format("/C ROBOCOPY \"{0}\" \"{1}\" \"{2}\"" + get_value_from_json("robocopy_option"), src_dir, dst_dir, copy_filter);
+                    p.StartInfo.FileName = "cmd.exe";
+                    p.StartInfo.CreateNoWindow = true;
+                    p.StartInfo.UseShellExecute = false;
+                    p.StartInfo.RedirectStandardOutput = true;
+                    p.StartInfo.RedirectStandardError = true;
+                    p.Start();
+                    loger_module.write_log(p.StartInfo.Arguments);
+                    loger_module.write_log(p.StandardOutput.ReadToEnd());
+                    loger_module.write_log(p.StandardError.ReadToEnd(), "error", "info");
+                    p.WaitForExit();
+                }
+            }
+            catch (Exception e)
+            {
+                loger_module.write_log(e.Message, "error", "info");
             }
         }
 
