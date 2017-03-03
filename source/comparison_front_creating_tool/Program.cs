@@ -31,19 +31,27 @@ namespace comparison_front_creating_tool
                 string export_dir = get_value_from_json("export_dir", constant.EXPORT_DIR);
                 string resources_dir = get_value_from_hasharray(hash_array, "RESOURCES_DIR", constant.RESOURCES_DIR);
 
+                Console.WriteLine("read setting from json : start");
                 setup_logs(hash_array, log_dir); // ログ、エラーファイルのセットアップ
+                Console.WriteLine("read setting from json : end");
 
                 comparison_table compari_table = default(comparison_table);
 
                 var data_table = get_excel_data(resources_dir);
                 if (data_table != null)
+                {
+                    Console.WriteLine("storing AD User Infos : start");
                     compari_table = create_comparison_data(data_table);
+                    Console.WriteLine("storing AD User Infos : End");
+                }
 
                 string export_filename = get_value_from_json("export_xml_filename");
                 if (export_filename == "") throw new Exception("出力ファイル名が未定義");
 
                 // XMLへシリアライズ変換し出力
-                export_serialize(compari_table, export_dir, "temp.xml");
+                Console.WriteLine("Export AD User to Serialize : start");
+                export_serialize(compari_table, export_dir, get_value_from_json("export_xml_filename", constant.EXPORT_XML_FILENAME));
+                Console.WriteLine("Export AD User to Serialize : End");
 
                 loger_module.close();
             }
@@ -93,6 +101,7 @@ namespace comparison_front_creating_tool
         /// <param name="log_dir"></param>
         private static void setup_logs(Dictionary<string, string>args, string log_dir)
         {
+
             // ログファイルの関係設定
             string log_file = get_value_from_json("default_log_filename", constant.DEFAULT_LOG_FILENAME);
             log_file = get_value_from_hasharray(args, constant.RESOURCES_KEY_LOG, log_file);

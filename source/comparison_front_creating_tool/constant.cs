@@ -23,5 +23,8 @@
         public const string RESOURCES_DIR = "./resources/";
         public const string LOG_FILE_DIR = "./log/";
         public const string EXPORT_DIR = "./export/";
+
+        public const string EXPORT_XML_FILENAME = "comparison_list.xml";
+
     }
 }
