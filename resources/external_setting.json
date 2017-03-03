@@ -26,7 +26,7 @@
     "export_xml_filename" : "comparison_list.xml",
 
     "inport_xml_filename" : "comparison_list.xml",
-    "robocopy_option" : " /COPY:DASOU /Z /R:3 /W:5 /NP /MT:4",
+    "robocopy_option" : " /E /COPY:DAT /DCOPY:T /Z /FFT /R:3 /W:5 /NP /MT:4",
     "copy_dir_comparison_file" : "copy_dir_infos.xlsx",
     "copy_dir_info_sheet" : "copy_dir_info",
     "copy_dir_info_sheet_offset" : "0",
