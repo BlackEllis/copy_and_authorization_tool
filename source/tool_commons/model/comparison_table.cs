@@ -13,9 +13,23 @@ namespace tool_commons.model
         {
             comparsion_units = new List<comparsion_unit>();
         }
+
+        public Dictionary<string, comparsion_unit> transform_to_dictionary()
+        {
+            Dictionary<string, comparsion_unit> dst_dictionary = new Dictionary<string, comparsion_unit>();
+            if (comparsion_units == null) return null;
+            foreach (comparsion_unit unit in comparsion_units)
+            {
+                dst_dictionary.Add(unit.source_sid, unit);
+            }
+            return dst_dictionary;
+        }
     }
 
-   public class comparsion_unit : IEquatable<comparsion_unit>
+    /// <summary>
+    /// S-ID対比情報格納クラス
+    /// </summary>
+    public class comparsion_unit : IEquatable<comparsion_unit>
     {
         [System.Xml.Serialization.XmlAttribute("account_name")]
         public string account_name { get; set; }
