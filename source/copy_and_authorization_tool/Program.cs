@@ -140,16 +140,25 @@ namespace copy_and_authorization_tool
         /// <param name="src_dir">コピー元ディレクト</param>
         /// <param name="dst_dir">コピー先ディレクトリ</param>
         /// <param name="copy_filter">コピーフィルター</param>
-        private static void robocopy_process(string src_dir, string dst_dir, string copy_filter="")
+        /// <param name="exception_folder_list">対象外ディレクトリ一覧</param>
+        private static void robocopy_process(string src_dir, string dst_dir, string copy_filter="", List<string> exception_folder_list=null)
         {
             try
             {
                 if (src_dir.Equals("") || dst_dir.Equals("")) return;
                 if (copy_filter.Equals("")) copy_filter = "*.*";
 
+                // コピー対象外ディレクトリ設定
+                string exception_dir_str = "";
+                foreach(string folder_name in exception_folder_list)
+                {
+                    if (exception_dir_str.Equals("")) exception_dir_str = "/XD";
+                    exception_dir_str += $" {folder_name}"; 
+                }
+
                 using (Process p = new Process())
                 {
-                    p.StartInfo.Arguments = string.Format("/C ROBOCOPY \"{0}\" \"{1}\" \"{2}\"" + get_value_from_json("robocopy_option"), src_dir, dst_dir, copy_filter);
+                    p.StartInfo.Arguments = string.Format("/C ROBOCOPY \"{0}\" \"{1}\" \"{2}\"" + get_value_from_json("robocopy_option") + exception_dir_str, src_dir, dst_dir, copy_filter);
                     p.StartInfo.FileName = "cmd.exe";
                     p.StartInfo.CreateNoWindow = true;
                     p.StartInfo.UseShellExecute = false;
@@ -167,6 +176,5 @@ namespace copy_and_authorization_tool
                 loger_module.write_log(e.Message, "error", "info");
             }
         }
-
     }
 }
