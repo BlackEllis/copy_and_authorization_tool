@@ -19,6 +19,22 @@ robocopyとコピーしたアクセス権の移植プログラム
 3. 別ADから取得したユーザー情報を格納しているDBと突き合わせた結果をシリアライズクラスに格納
 4. シリアライズクラスをXMLへ出力
 
+## 実行オプション
++ __EXTERNAL_FILE__
+外部設定ファイル参照フォルダ設定オプション
+
++ __LOG_FILE__
+ログ出力先設定オプション
+
++ __ERROR_FILE__
+エラーファイル出力先設定オプション
+
+### 使用例
+```cmd
+copy_and_authorization_tool.exe "EXTERNAL_FILE=./resources/external_setting.json" "LOG_FILE=./log/system_log.log"
+```
+
+
 ## 使用ライブラリ
 + MySql.Data
 + System.DirectoryServices
