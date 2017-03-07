@@ -9,9 +9,10 @@ namespace copy_and_authorization_tool
     class constant
     {
         // 引数でのキーワード
-        public const string RESOURCES_KEY_EXTERNAL = "EXTERNAL_FILE";    // 外部設定ファイル参照フォルダ設定オプション
+        public const string RESOURCES_KEY_EXTERNAL = "EXTERNAL_FILE";   // 外部設定ファイル参照フォルダ設定オプション
         public const string RESOURCES_KEY_LOG = "LOG_FILE";             // ログ出力先設定オプション
         public const string RESOURCES_KEY_ERRORLOG = "ERROR_FILE";      // エラーファイル出力先設定オプション
+        public const string RESOURCES_KEY_DIFF_MODE = "DIFF_MODE";      // robocopyをテストモードで動作させるオプション
 
         // デフォルトの外部設定ファイルの情報
         public const string EXTERNAL_RESOURCE_ENCODE = "utf-8";                     // 文字コード

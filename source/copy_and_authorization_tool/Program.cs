@@ -21,12 +21,11 @@ namespace copy_and_authorization_tool
             try
             {
                 Console.WriteLine("read setting from json : start");
-                string json_file = "";
-                if (hash_array.ContainsKey(constant.RESOURCES_KEY_EXTERNAL))
-                    json_file = hash_array[constant.RESOURCES_KEY_EXTERNAL];
-                else
-                    json_file = constant.RESOURCES_DIR + constant.EXTERNAL_RESOURCE_FILENAME;
-                json_module.setup(json_file);
+                json_module.setup(
+                    get_value_from_hasharray(hash_array, 
+                                            constant.RESOURCES_KEY_EXTERNAL, 
+                                            constant.RESOURCES_DIR + constant.EXTERNAL_RESOURCE_FILENAME)
+                );
 
                 // 各外部ファイルのディレクトリ先を設定
                 string log_dir = get_value_from_json("log_file_dir", constant.LOG_FILE_DIR);
@@ -49,6 +48,7 @@ namespace copy_and_authorization_tool
                 string exception_copy_dir_sheet = get_value_from_json("exception_copy_dir_sheet");
                 int exception_copy_dir_sheet_offset = int.Parse(get_value_from_json("exception_copy_dir_sheet_offset"));
                 DataTable exception_copy_table = excel_converter_module.read_excel_by_row(resouces_excel_file, resources_dir, exception_copy_dir_sheet, exception_copy_dir_sheet_offset);
+
                 List<string> exception_list = new List<string>();
                 foreach (DataRow row in exception_copy_table.Rows)
                 {
@@ -56,12 +56,18 @@ namespace copy_and_authorization_tool
                         exception_list.Add(row["対象外ディレクトリ名"].ToString());
                 }
 
+                // robocopyをテストモードで動作させるか判定用パラメータ取得
+                bool diff_mode = bool.Parse(get_value_from_hasharray(hash_array, constant.RESOURCES_KEY_DIFF_MODE, "False"));
+
                 // ロボコピー実行関数
                 foreach (DataRow row in copy_info_table.Rows)
                 {
                     Console.WriteLine("run robocopy process : start");
-                    robocopy_process(row["コピー元ディレクトリ"].ToString(), row["コピー先ディレクトリ"].ToString(), exception_list);
+                    robocopy_process(row["コピー元ディレクトリ"].ToString(), row["コピー先ディレクトリ"].ToString(), exception_list, "", diff_mode);
                     Console.WriteLine("run robocopy process : end");
+
+                    if (diff_mode) continue;
+
                     Console.WriteLine("run conversion　association process : start");
                     conversion_association(row["コピー元ディレクトリ"].ToString(), row["コピー先ディレクトリ"].ToString(), ref comparison_list, ref exception_list);
                     Console.WriteLine("run conversion　association process : end");
@@ -165,7 +171,7 @@ namespace copy_and_authorization_tool
         /// <param name="dst_dir">コピー先ディレクトリ</param>
         /// <param name="copy_filter">コピーフィルター</param>
         /// <param name="exception_folder_list">対象外ディレクトリ一覧</param>
-        private static void robocopy_process(string src_dir, string dst_dir, List<string> exception_folder_list=null, string copy_filter = "")
+        private static void robocopy_process(string src_dir, string dst_dir, List<string> exception_folder_list=null, string copy_filter = "", bool diff_mode = false)
         {
             try
             {
@@ -182,7 +188,10 @@ namespace copy_and_authorization_tool
 
                 using (Process p = new Process())
                 {
-                    p.StartInfo.Arguments = string.Format("/C ROBOCOPY \"{0}\" \"{1}\" \"{2}\"" + get_value_from_json("robocopy_option") + exception_dir_str, src_dir, dst_dir, copy_filter);
+                    if (diff_mode)
+                        p.StartInfo.Arguments = string.Format("/C ROBOCOPY \"{0}\" \"{1}\" \"{2}\" /L" + get_value_from_json("robocopy_option") + exception_dir_str, src_dir, dst_dir, copy_filter);
+                    else
+                        p.StartInfo.Arguments = string.Format("/C ROBOCOPY \"{0}\" \"{1}\" \"{2}\"" + get_value_from_json("robocopy_option") + exception_dir_str, src_dir, dst_dir, copy_filter);
                     p.StartInfo.FileName = "cmd.exe";
                     p.StartInfo.CreateNoWindow = true;
                     p.StartInfo.UseShellExecute = false;

@@ -29,6 +29,12 @@ robocopyとコピーしたアクセス権の移植プログラム
 + __ERROR_FILE__
 エラーファイル出力先設定オプション
 
++ __DIFF_MODE__
+copy_and_authorization_toolのみ
+robocopyをテストモードで使用するか用パラメータ
+True：使用
+False：使用しない
+
 ### 使用例
 ```cmd
 copy_and_authorization_tool.exe "EXTERNAL_FILE=./resources/external_setting.json" "LOG_FILE=./log/system_log.log"
