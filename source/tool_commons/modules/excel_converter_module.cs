@@ -15,7 +15,7 @@ namespace tool_commons.modules
         /// <param name="sheet_name">読み取るシート名</param>
         /// <param name="read_offset_row">読み出し開始行数</param>
         /// <returns></returns>
-        public static DataTable read_excel_by_row(string file_name, string read_dir, string sheet_name, int read_offset_row)
+        public static DataTable read_excel_by_row(string file_name, string read_dir, string sheet_name, int read_offset_row=0)
         {
             DataTable dst_td = new DataTable();
             string read_file = path_extracted(file_name);
