@@ -29,7 +29,7 @@ namespace tool_commons.modules
                 if (log_dir == "") // パス情報が無ければ、固定値にする
                 {
                     log_dir = output_dir;
-                    var join_filename = log_dir + file_name;
+                    string join_filename = log_dir + file_name;
                     log_file_name = create_log_filename(join_filename, debug_flg);
                 }
                 else
@@ -73,8 +73,11 @@ namespace tool_commons.modules
                 {
                     if (str == "") return true;
 
-                    var write_str = (!category.Equals("")) ? category + ": " : "";
+                    DateTime dt_obj = DateTime.Now;
+                    string write_str = dt_obj.ToString("HH:mm:ss.fff ");
+                    write_str += (!category.Equals("")) ? $"[{category}]" + ": " : "";
                     write_str += str;
+
                     st_write.Write(write_str);
                     st_write.Flush();
                     st_write.WriteLine();
@@ -94,7 +97,7 @@ namespace tool_commons.modules
                 return;
             }
 
-            var write_category = replace_category.Equals("") ? log_category : replace_category;
+            string write_category = replace_category.Equals("") ? log_category : replace_category;
             if (_stream_list.ContainsKey(write_category))
                 write_log(_stream_list[write_category], write_category);  // 該当するファイルのストリームがある場合
             else
@@ -114,8 +117,8 @@ namespace tool_commons.modules
             string extension = "";
 
             DateTime dt_obj = DateTime.Now;
-            var dt_stmp = dt_obj.ToString("yyyy-MM-dd_") + dt_obj.ToString("HHmmss");
-            var cat_point = file_name.LastIndexOf(".");
+            string dt_stmp = dt_obj.ToString("yyyy-MM-dd_") + dt_obj.ToString("HHmmss");
+            int cat_point = file_name.LastIndexOf(".");
             if (cat_point != -1)
             {
                 name = file_name.Substring(0, cat_point);
@@ -127,7 +130,7 @@ namespace tool_commons.modules
                 extension = ".log";
             }
 
-            var dst_filename = "";
+            string dst_filename = "";
             if (debug_flg == true)
                 dst_filename = name + extension;
             else
@@ -145,8 +148,8 @@ namespace tool_commons.modules
         /// <returns>最後に出現した具切り文字までの文字列</returns>
         private static string path_extracted(string path, string padding_font = "/")
         {
-            var st_path = path.Replace("\\", padding_font);
-            var cat_point = st_path.LastIndexOf(padding_font);
+            string st_path = path.Replace("\\", padding_font);
+            int cat_point = st_path.LastIndexOf(padding_font);
             if (cat_point == -1) return "";
 
             return st_path.Substring(0, cat_point);
