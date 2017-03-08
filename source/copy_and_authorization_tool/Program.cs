@@ -135,17 +135,17 @@ namespace copy_and_authorization_tool
             log_file = get_value_from_hasharray(args, constant.RESOURCES_KEY_LOG, log_file);
             string log_encode = get_value_from_json("log_file_encode", constant.LOG_FILE_ENCODE);
 
-            // エラーファイルの関係設定
-            string error_file = get_value_from_json("default_error_filename", constant.DEFAULT_ERROR_FILENAME);
-            error_file = get_value_from_hasharray(args, constant.RESOURCES_KEY_ERRORLOG, error_file);
-            string error_encode = get_value_from_json("error_file_encode", constant.ERROR_FILE_ENCODE);
+            // 抽出ログファイルの関係設定
+            string extracting_file = get_value_from_json("default_extracting_filename", constant.DEFAULT_EXTRACTING_FILENAME);
+            extracting_file = get_value_from_hasharray(args, constant.RESOURCES_KEY_EXTRACTINGLOG, extracting_file);
+            string extracting_encode = get_value_from_json("extracting_file_encode", constant.EXTRACTING_FILE_ENCODE);
 
 #if DEBUG
             loger_module.loger_setup(log_file, log_dir, log_encode, "info", true);
-            loger_module.loger_setup(error_file, log_dir, error_encode, "error", true);
+            loger_module.loger_setup(extracting_file, log_dir, extracting_encode, "extracting", true);
 #else
             loger_module.loger_setup(log_file, log_dir, log_encode, "info");
-            loger_module.loger_setup(error_file, log_dir, error_encode, "error");
+            loger_module.loger_setup(extracting_file, log_dir, extracting_encode, "error");
 #endif
         }
 
@@ -301,7 +301,7 @@ namespace copy_and_authorization_tool
                         check_flg = file_authority_replacement(src_file, dst_file, ref comparison_list);
                         break;
                     }
-                    if (!check_flg) loger_module.write_log($"該当ファイルがコピーされていないか、アクセス権がありません。：{src_file}", "error");
+                    if (!check_flg) loger_module.write_log($"該当ファイルがコピーされていないか、アクセス権がありません。：{src_file}", "extracting");
                 }
 
                 // フォルダを掘り下げる
@@ -343,13 +343,20 @@ namespace copy_and_authorization_tool
                 foreach (FileSystemAccessRule src_rules in src_dir_security.GetAccessRules(true, true, typeof(NTAccount)))
                 {
                     if (comparison_list.ContainsKey(src_rules.IdentityReference.Value.ToString()))
+                    {
+                        loger_module.write_log($"変換対象アカウント：{src_rules.IdentityReference.ToString()} → {comparison_list[src_rules.IdentityReference.ToString()].target_sid} | {src_rules.FileSystemRights.ToString()}");
                         dst_dir_security.AddAccessRule(new FileSystemAccessRule(comparison_list[src_rules.IdentityReference.Value.ToString()].target_sid,
                                                                                 src_rules.FileSystemRights,
                                                                                 src_rules.InheritanceFlags,
                                                                                 src_rules.PropagationFlags,
                                                                                 src_rules.AccessControlType));
+                    }
                     else
+                    {
+                        loger_module.write_log("適応先：" + ((src_rules.InheritanceFlags & InheritanceFlags.ContainerInherit) > 0 ? "このフォルダとサブフォルダ" : "このフォルダのみ"), "extracting");
+                        loger_module.write_log($"変換対象外アカウント：{src_rules.IdentityReference.ToString()} | {src_rules.FileSystemRights.ToString()}", "extracting");
                         dst_dir_security.AddAccessRule(src_rules);
+                    }
                 }
                 if (dst_dir_security.GetAccessRules(true, true, typeof(NTAccount)).Count > 0)
                     Directory.SetAccessControl(dst_dir.FullName, dst_dir_security); // アクセス権の設定
@@ -386,17 +393,17 @@ namespace copy_and_authorization_tool
                     if (comparison_list.ContainsKey(src_rules.IdentityReference.ToString()))
                     {
                         // 変換対象があれば、S-IDを変換して登録
+                        loger_module.write_log($"変換対象アカウント：{src_rules.IdentityReference.ToString()} → {comparison_list[src_rules.IdentityReference.ToString()].target_sid} | {src_rules.FileSystemRights.ToString()}");
                         dst_file_security.AddAccessRule(new FileSystemAccessRule(comparison_list[src_rules.IdentityReference.ToString()].target_sid,
                                                                                     src_rules.FileSystemRights,
                                                                                     src_rules.InheritanceFlags,
                                                                                     src_rules.PropagationFlags,
                                                                                     src_rules.AccessControlType));
-                        loger_module.write_log($"変換対象アカウント：{src_rules.IdentityReference.ToString()} → {comparison_list[src_rules.IdentityReference.ToString()].target_sid} | {src_rules.FileSystemRights.ToString()}", "error");
                     }
                     else
                     {
-                        loger_module.write_log("適応先：" + ((src_rules.InheritanceFlags & InheritanceFlags.ContainerInherit) > 0 ? "このフォルダとサブフォルダ" : "このフォルダのみ"), "error");
-                        loger_module.write_log($"変換対象外アカウント：{src_rules.IdentityReference.ToString()} | {src_rules.FileSystemRights.ToString()}", "error");
+                        loger_module.write_log("適応先：" + ((src_rules.InheritanceFlags & InheritanceFlags.ContainerInherit) > 0 ? "このフォルダとサブフォルダ" : "このフォルダのみ"), "extracting");
+                        loger_module.write_log($"変換対象外アカウント：{src_rules.IdentityReference.ToString()} | {src_rules.FileSystemRights.ToString()}", "extracting");
                         dst_file_security.AddAccessRule(src_rules); // 変換対象が無ければ、移管元の権限そのまま移管
                     }
                 }

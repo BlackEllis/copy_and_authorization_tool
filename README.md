@@ -35,9 +35,9 @@ robocopyとコピーしたアクセス権の移植プログラム
 
     ログ出力先設定オプション
 
-+ __ERROR_FILE__
++ __EXTRACTING_FILE__
 
-    エラーファイル出力先設定オプション
+    抽出ログファイル出力先設定オプション
 
 ### copy_and_authorization_toolのみ
 + __DIFF_MODE__
