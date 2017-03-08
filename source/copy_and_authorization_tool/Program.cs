@@ -26,15 +26,16 @@ namespace copy_and_authorization_tool
                                             constant.RESOURCES_KEY_EXTERNAL, 
                                             constant.RESOURCES_DIR + constant.EXTERNAL_RESOURCE_FILENAME)
                 );
+                Console.WriteLine("read setting from json : end");
 
                 // 各外部ファイルのディレクトリ先を設定
                 string log_dir = get_value_from_json("log_file_dir", constant.LOG_FILE_DIR);
                 string export_dir = get_value_from_json("export_dir", constant.EXPORT_DIR);
                 string resources_dir = get_value_from_hasharray(hash_array, "RESOURCES_DIR", constant.RESOURCES_DIR);
 
-                Console.WriteLine("read setting from json : start");
+                Console.WriteLine("log feature setup : start");
                 setup_logs(hash_array, log_dir); // ログ、エラーファイルのセットアップ
-                Console.WriteLine("read setting from json : end");
+                Console.WriteLine("log feature setup : end");
 
                 // デシリアライズした結果を連想配列に格納
                 Console.WriteLine("deserialize to Dictionary : start");
@@ -52,8 +53,9 @@ namespace copy_and_authorization_tool
                 List<string> exception_list = new List<string>();
                 foreach (DataRow row in exception_copy_table.Rows)
                 {
-                    if (!row["対象外ディレクトリ名"].Equals(""))
-                        exception_list.Add(row["対象外ディレクトリ名"].ToString());
+                    string exception_copy_dir = row["対象外ディレクトリ名"].ToString();
+                    if (!exception_copy_dir.Equals(""))
+                        exception_list.Add(exception_copy_dir);
                 }
 
                 // robocopyをテストモードで動作させるか判定用パラメータ取得
@@ -62,14 +64,21 @@ namespace copy_and_authorization_tool
                 // ロボコピー実行関数
                 foreach (DataRow row in copy_info_table.Rows)
                 {
+                    string src_dir = row["コピー元ディレクトリ"].ToString();
+                    string dst_dir = row["コピー先ディレクトリ"].ToString();
+                    string user_id = row["コピー先アクセスID"].ToString();
+                    string user_pw = row["コピー先アクセスPW"].ToString();
+
                     Console.WriteLine("run robocopy process : start");
-                    robocopy_process(row["コピー元ディレクトリ"].ToString(), row["コピー先ディレクトリ"].ToString(), exception_list, "", diff_mode);
+                    communication_with_external_server(src_dir, dst_dir, user_id, user_pw, true);
+                    robocopy_process(src_dir, dst_dir, exception_list, row["コピーフィルター"].ToString(), diff_mode);
+                    communication_with_external_server(src_dir, dst_dir, user_id, user_pw, false);
                     Console.WriteLine("run robocopy process : end");
 
                     if (diff_mode) continue;
 
                     Console.WriteLine("run conversion　association process : start");
-                    conversion_association(row["コピー元ディレクトリ"].ToString(), row["コピー先ディレクトリ"].ToString(), ref comparison_list, ref exception_list);
+                    conversion_association(src_dir, dst_dir, ref comparison_list, ref exception_list);
                     Console.WriteLine("run conversion　association process : end");
                 }
 
@@ -165,12 +174,53 @@ namespace copy_and_authorization_tool
         }
 
         /// <summary>
+        /// 外部サーバーのネットワークドライブ接続、切断関数
+        /// </summary>
+        /// <param name="server_name">接続先ネットワークドライブ</param>
+        /// <param name="user_id">アクセスID</param>
+        /// <param name="user_pw">アクセスPW</param>
+        /// <param name="connection_mode">true: 接続　false: 切断</param>
+        private static void communication_with_external_server(string src_dir, string dst_dir, string user_id, string user_pw, bool connection_mode=true)
+        {
+            // コピー元、コピー先何れかが共有フォルダであれば処理を行う
+            // 両方共有フォルダだった場合は処理を行わない
+            if (src_dir.StartsWith("\\\\") ^ dst_dir.StartsWith("\\\\")) return ;
+            if (user_id.Equals("") || user_pw.Equals("")) return ;
+
+            string target_name = src_dir.StartsWith("\\\\") ? src_dir : dst_dir;
+
+            int cat_point = target_name.LastIndexOf("$");
+            if (cat_point == -1) return; // 共有フォルダの＄が無ければ処理を打ち切る
+
+            string connection_name = target_name.Substring(0, cat_point); // PC名＋共有フォルダまでの文字列の切り出し
+            using (Process p = new Process())
+            {
+                if (connection_mode)
+                    p.StartInfo.Arguments = string.Format("/C NET USE \"{0}\" \"{1}\" /user:\"{2}\"" , connection_name, user_pw, user_id);
+                else
+                    p.StartInfo.Arguments = string.Format("/C NET USE \"{0}\" /delete", connection_name);
+                p.StartInfo.FileName = "cmd.exe";
+                p.StartInfo.CreateNoWindow = true;
+                p.StartInfo.UseShellExecute = false;
+                p.StartInfo.RedirectStandardOutput = true;
+                p.StartInfo.RedirectStandardError = true;
+                p.Start();
+                loger_module.write_log(p.StartInfo.Arguments);
+                loger_module.write_log(p.StandardOutput.ReadToEnd());
+                loger_module.write_log(p.StandardError.ReadToEnd(), "error", "info");
+                p.WaitForExit();
+            }
+        }
+
+        /// <summary>
         /// ロボコピー実行関数
         /// </summary>
         /// <param name="src_dir">コピー元ディレクト</param>
         /// <param name="dst_dir">コピー先ディレクトリ</param>
         /// <param name="copy_filter">コピーフィルター</param>
         /// <param name="exception_folder_list">対象外ディレクトリ一覧</param>
+        /// <param name="copy_filter"></param>
+        /// <param name="diff_mode"></param>
         private static void robocopy_process(string src_dir, string dst_dir, List<string> exception_folder_list=null, string copy_filter = "", bool diff_mode = false)
         {
             try
