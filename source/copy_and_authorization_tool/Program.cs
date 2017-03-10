@@ -192,7 +192,7 @@ namespace copy_and_authorization_tool
             int cat_point = target_name.LastIndexOf("$");
             if (cat_point == -1) return; // 共有フォルダの＄が無ければ処理を打ち切る
 
-            string connection_name = target_name.Substring(0, cat_point); // PC名＋共有フォルダまでの文字列の切り出し
+            string connection_name = target_name.Substring(0, cat_point +1); // PC名＋共有フォルダまでの文字列の切り出し
             using (Process p = new Process())
             {
                 if (connection_mode)
