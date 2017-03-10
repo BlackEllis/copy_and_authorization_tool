@@ -227,7 +227,7 @@ namespace comparison_front_creating_tool
                         }
                         catch (Exception e)
                         {
-                            loger_module.write_log(e.Message, "error", "ifno");
+                            loger_module.write_log(e.Message, "error", "info");
                         }
                     }
                 }
@@ -248,7 +248,7 @@ namespace comparison_front_creating_tool
                     }
                     catch (Exception e)
                     {
-                        loger_module.write_log(e.Message, "error", "ifno");
+                        loger_module.write_log(e.Message, "error", "info");
                     }
                 }
             }
@@ -285,7 +285,7 @@ namespace comparison_front_creating_tool
             }
             catch (Exception e)
             {
-                loger_module.write_log(e.Message, "error", "ifno");
+                loger_module.write_log(e.Message, "error", "info");
             }
 
         }
