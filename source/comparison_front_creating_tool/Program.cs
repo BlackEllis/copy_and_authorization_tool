@@ -43,7 +43,7 @@ namespace comparison_front_creating_tool
                 if (data_table != null)
                 {
                     Console.WriteLine("storing AD User Infos : start");
-                    compari_table = create_comparison_data(data_table);
+                   compari_table = create_comparison_data(data_table);
                     Console.WriteLine("storing AD User Infos : End");
                 }
 
@@ -139,11 +139,11 @@ namespace comparison_front_creating_tool
             // ADからグループ
             var ad_obj = new active_direcory_module();
 
-            string ad_server_name = get_value_from_json("ad_server");
-            string ad_access_userid = get_value_from_json("access_userid");
-            string ad_access_userpw = get_value_from_json("access_passwd");
-            string ad_common_names = get_value_from_json("common_names");
-            string ad_organizational_units = get_value_from_json("organizational_units");
+            string ad_server_name = get_value_from_json("src_ad_server");
+            string ad_access_userid = get_value_from_json("src_access_userid");
+            string ad_access_userpw = get_value_from_json("src_access_passwd");
+            string ad_common_names = get_value_from_json("src_common_names");
+            string ad_organizational_units = get_value_from_json("src_organizational_units");
 
             ad_obj.get_group_list(ad_server_name, isolat_from_str(ad_common_names, ','), isolat_from_str(ad_organizational_units, '\''), ad_access_userid, ad_access_userpw);
 
@@ -201,12 +201,30 @@ namespace comparison_front_creating_tool
         /// <returns></returns>
         private static comparison_table create_comparison_data(DataTable group_list)
         {
+            Func<string, string, string> transform_str_to_cug = (string src_str, string account_name_filter) =>
+            {
+                string trim_str = src_str.Trim(); // 前後の空白を排除
+                int all_appear_position = account_name_filter.LastIndexOf('*'); // フィルターでしてした＊の出現位置取得
+                if (all_appear_position == -1) return "";
+
+                string group_header = account_name_filter.Substring(0, all_appear_position);
+                return group_header + trim_str;
+            };
+
             comparison_table compari_table = new comparison_table();
 
-            var ad_obj = get_ad_object();
-            var mysql = create_mysql_module();
+            active_direcory_module ad_obj = get_ad_object();
+            mysql_module mysql = create_mysql_module();
+            Dictionary<string, group_info> group_infos = get_group_infos_from_ad();
+            string ad_account_name_filter = get_value_from_json("dst_account_name_filter");
 
-           foreach (KeyValuePair<string, group_info> ad_group_membars in ad_obj.groups_list)
+            if ((group_infos == null) || (group_infos.Count == 0))
+            {
+                loger_module.write_log("ADからの取得グループ情報がありません", "error", "info");
+                return null;
+            }
+
+            foreach (KeyValuePair<string, group_info> ad_group_membars in ad_obj.groups_list)
             {
                 // グループ情報の追加
                 string query_str = $"Name = '{ad_group_membars.Key}'";
@@ -217,19 +235,26 @@ namespace comparison_front_creating_tool
                     {
                         try
                         {
+                            string group_name = transform_str_to_cug(result_row["CUGコード"].ToString(), ad_account_name_filter);
+                            if (!group_infos.ContainsKey(group_name)) throw new Exception($"ADから取得した情報に該当するグループがありません グループ名: {ad_group_membars.Value.account_name}");
+
                             comparsion_unit unit = new comparsion_unit();
-                            unit.account_name = result_row["SamAccountName"].ToString();
+                            unit.account_name = ad_group_membars.Value.account_name;
                             unit.source_sid = ad_group_membars.Value.sid;
-                            unit.target_sid = result_row["SID"].ToString();
+                            unit.target_sid = group_infos[group_name].sid;
 
                             if (!compari_table.comparsion_units.Contains(unit))
                                 compari_table.comparsion_units.Add(unit);
                         }
                         catch (Exception e)
                         {
-                            loger_module.write_log(e.Message, "error", "info");
+                            loger_module.write_log(e.Message, "error");
                         }
                     }
+                }
+                else
+                {
+                    loger_module.write_log($"該当するグループ名がありません グループ名: {ad_group_membars.Key}", "error", "info");
                 }
 
                 if (ad_group_membars.Value.group_members.Count == 0) continue;
@@ -248,7 +273,7 @@ namespace comparison_front_creating_tool
                     }
                     catch (Exception e)
                     {
-                        loger_module.write_log(e.Message, "error", "info");
+                            loger_module.write_log(e.Message, "error", "info");
                     }
                 }
             }
@@ -288,6 +313,32 @@ namespace comparison_front_creating_tool
                 loger_module.write_log(e.Message, "error", "info");
             }
 
+        }
+
+        /// <summary>
+        /// ADからグループ一覧の取得
+        /// </summary>
+        /// <returns></returns>
+        private static Dictionary<string, group_info> get_group_infos_from_ad()
+        {
+            Func<string, char, string[]> isolat_from_str = (string src_str, char delimiter) =>
+            {
+                string pad_str = src_str.Replace(" ", "");
+                string[] dst_strs = src_str.Split(delimiter);
+                return dst_strs;
+            };
+
+            string ad_server_name = get_value_from_json("dst_ad_server");
+            string ad_access_userid = get_value_from_json("dst_access_userid");
+            string ad_access_userpw = get_value_from_json("dst_access_passwd");
+            string ad_common_names = get_value_from_json("dst_common_names");
+            string ad_organizational_units = get_value_from_json("dst_organizational_units");
+            string ad_account_name_filter = get_value_from_json("dst_account_name_filter");
+
+            return active_direcory_module.get_group_infos(ad_server_name,
+                                                        isolat_from_str(ad_common_names, ','),
+                                                        isolat_from_str(ad_organizational_units, '\''),
+                                                        ad_account_name_filter, ad_access_userid, ad_access_userpw);
         }
     }
 }

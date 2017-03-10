@@ -60,8 +60,8 @@ namespace tool_commons.modules
                 {
                     myResult = objResult;
                     objGroupEntry = objResult.GetDirectoryEntry();
-                    var sid = new SecurityIdentifier((byte[])objGroupEntry.Properties["objectSid"][0], 0).ToString();
                     var group_name = objGroupEntry.Properties["sAMAccountName"].Value.ToString();
+                    var sid = new SecurityIdentifier((byte[])objGroupEntry.Properties["objectSid"][0], 0).ToString();
                     if (!groups.ContainsKey(group_name))
                         groups.Add(group_name, new group_info(group_name, sid));
                     ExpandGroup(objGroupEntry, user, pass);
@@ -110,8 +110,8 @@ namespace tool_commons.modules
                     {
                         user_info user_obj = new user_info(result.GetDirectoryEntry());
                         ExpandGroup(create_entry_obj(result.Path, user, pass), user, pass);
-                        var sid = new SecurityIdentifier((byte[])group.Properties["objectSid"][0], 0).ToString();
                         var group_name = group.Properties["sAMAccountName"].Value.ToString();
+                        var sid = new SecurityIdentifier((byte[])group.Properties["objectSid"][0], 0).ToString();
                         if (groups.ContainsKey(group_name))
                         {
                             groups[group_name].add_user_info(user_obj);
@@ -141,46 +141,102 @@ namespace tool_commons.modules
         }
 
         /// <summary>
+        /// 検索条件に一致するグループ情報をADから取り出す
+        /// </summary>
+        /// <param name="host">接続ADサーバー</param>
+        /// <param name="common_names">検索表示名</param>
+        /// <param name="organizational_units">検索所属</param>
+        /// <param name="account_name_filter">アカウント名で掛けるフィルタ</param>
+        /// <param name="user">接続ユーザーID</param>
+        /// <param name="pass">接続ユーザーパスワード</param>
+        /// <returns></returns>
+        public static Dictionary<string, group_info> get_group_infos(string host, string[] common_names, string[] organizational_units, string account_name_filter = "", string user = "", string pass = "")
+        {
+            Dictionary<string, group_info> dst_dictionary = new Dictionary<string, group_info>();
+            string access_url = create_ldap_url_str(host, common_names, organizational_units);
+            DirectoryEntry directory_entory = default(DirectoryEntry);
+
+            try
+            {
+                if (access_url.Equals(""))
+                    directory_entory = new DirectoryEntry();
+                else
+                    directory_entory = new DirectoryEntry(access_url, user, pass);
+                DirectorySearcher directory_searcher = new DirectorySearcher(directory_entory); //引数を渡さなくてもいいかも
+
+                string name_filter = account_name_filter.Equals("") ? "*" : account_name_filter; // 「*」をワイルドカードとして使える
+
+                directory_searcher.Filter = string.Format("(&(objectClass=group)(sAMAccountName={0}))", name_filter);
+                directory_searcher.SizeLimit = int.MaxValue;
+                directory_searcher.PageSize = int.MaxValue;
+                directory_searcher.SearchScope = System.DirectoryServices.SearchScope.Subtree;
+
+                SearchResult result = directory_searcher.FindOne();
+                // null -> 該当 user が見つからない
+
+                SearchResultCollection objs = directory_searcher.FindAll();
+                foreach (SearchResult obj in objs)
+                {
+                    DirectoryEntry obj_entry = obj.GetDirectoryEntry();
+                    var group_name = obj_entry.Properties["sAMAccountName"].Value.ToString();
+                    var sid = new SecurityIdentifier((byte[])obj_entry.Properties["objectSid"][0], 0).ToString();
+                    group_info group_obj = new group_info(group_name, sid);
+                    if (group_obj.account_name.Length > 0)
+                        dst_dictionary.Add(group_name, group_obj);
+                }
+
+                return dst_dictionary;
+            }
+            catch (Exception e)
+            {
+                loger_module.write_log(e.Message, "error", "info");
+                return null;
+            }
+        }
+
+        /// <summary>
         /// 検索条件に一致するユーザー情報をADから取り出す
         /// </summary>
         /// <param name="host">接続ADサーバー</param>
         /// <param name="common_names">検索表示名</param>
         /// <param name="organizational_units">検索所属</param>
+        /// <param name="account_name_filter">アカウント名で掛けるフィルタ</param>
         /// <param name="user">接続ユーザーID</param>
         /// <param name="pass">接続ユーザーパスワード</param>
         /// <returns></returns>
-        public static List<user_info> get_infomation(string host, string[] common_names, string[] organizational_units, string user="", string pass="")
+        public static Dictionary<string, user_info> get_user_infos(string host, string[] common_names, string[] organizational_units, string account_name_filter="", string user="", string pass="")
         {
+            Dictionary<string, user_info> dst_dictionary = new Dictionary<string, user_info>();
+            string access_url = create_ldap_url_str(host, common_names, organizational_units);
+            DirectoryEntry directory_entory = default(DirectoryEntry);
+
             try
             {
-                List<user_info> dst_list = new List<user_info>();
-                var access_url = create_ldap_url_str(host, common_names, organizational_units);
-                var directoryEntry = default(DirectoryEntry);
                 if (access_url.Equals(""))
-                    directoryEntry = new DirectoryEntry();
+                    directory_entory = new DirectoryEntry();
                 else
-                    directoryEntry = new DirectoryEntry(access_url, user, pass);
-                var directorySearcher = new DirectorySearcher(directoryEntry); //引数を渡さなくてもいいかも
+                    directory_entory = new DirectoryEntry(access_url, user, pass);
+                DirectorySearcher directory_searcher = new DirectorySearcher(directory_entory); //引数を渡さなくてもいいかも
 
-                var displayName = "*"; // 「*」をワイルドカードとして使える
+                string name_filter = account_name_filter.Equals("") ? "*" : account_name_filter; // 「*」をワイルドカードとして使える
 
-                directorySearcher.Filter = String.Format("(&(objectClass=user)(DisplayName={0}))", displayName);
-                directorySearcher.SizeLimit = int.MaxValue;
-                directorySearcher.PageSize = int.MaxValue;
+                directory_searcher.Filter = String.Format("(&(objectClass=user)(DisplayName={0}))", name_filter);
+                directory_searcher.SizeLimit = int.MaxValue;
+                directory_searcher.PageSize = int.MaxValue;
 
-                var result = directorySearcher.FindOne();
+                SearchResult result = directory_searcher.FindOne();
                 // null -> 該当 user が見つからない
 
-                SearchResultCollection objs = directorySearcher.FindAll();
+                SearchResultCollection objs = directory_searcher.FindAll();
                 foreach (SearchResult obj in objs)
                 {
                     DirectoryEntry obj_entry = obj.GetDirectoryEntry();
                     user_info user_obj = new user_info(obj_entry);
-                    if (user_obj.account_name.Length > 0)
-                        dst_list.Add(user_obj);
+                    if ((user_obj.account_name.Length > 0) && !dst_dictionary.ContainsKey(user_obj.account_name))
+                        dst_dictionary.Add(user_obj.account_name, user_obj);
                 }
 
-                return dst_list;
+                return dst_dictionary;
             }
             catch (Exception e)
             {
