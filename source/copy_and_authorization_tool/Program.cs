@@ -145,7 +145,7 @@ namespace copy_and_authorization_tool
             loger_module.loger_setup(extracting_file, log_dir, extracting_encode, "extracting", true);
 #else
             loger_module.loger_setup(log_file, log_dir, log_encode, "info");
-            loger_module.loger_setup(extracting_file, log_dir, extracting_encode, "error");
+            loger_module.loger_setup(extracting_file, log_dir, extracting_encode, "extracting");
 #endif
         }
 
@@ -190,9 +190,9 @@ namespace copy_and_authorization_tool
             string target_name = src_dir.StartsWith("\\\\") ? src_dir : dst_dir;
 
             int cat_point = target_name.LastIndexOf("$");
-            if (cat_point == -1) return; // 共有フォルダの＄が無ければ処理を打ち切る
+            string connection_name = target_name;
+            if (cat_point != -1) connection_name = target_name.Substring(0, cat_point + 1); // PC名＋共有フォルダまでの文字列の切り出し
 
-            string connection_name = target_name.Substring(0, cat_point +1); // PC名＋共有フォルダまでの文字列の切り出し
             using (Process p = new Process())
             {
                 if (connection_mode)
@@ -342,10 +342,15 @@ namespace copy_and_authorization_tool
 
                 foreach (FileSystemAccessRule src_rules in src_dir_security.GetAccessRules(true, true, typeof(NTAccount)))
                 {
-                    if (comparison_list.ContainsKey(src_rules.IdentityReference.Value.ToString()))
+                    int cat_pint = src_rules.IdentityReference.ToString().LastIndexOf('\\') + 1;
+                    string account_name = src_rules.IdentityReference.ToString().Substring(cat_pint);
+                    if (comparison_list.ContainsKey(account_name))
                     {
-                        loger_module.write_log($"変換対象アカウント：{src_rules.IdentityReference.ToString()} → {comparison_list[src_rules.IdentityReference.ToString()].target_sid} | {src_rules.FileSystemRights.ToString()}");
-                        dst_dir_security.AddAccessRule(new FileSystemAccessRule(comparison_list[src_rules.IdentityReference.Value.ToString()].target_sid,
+                        loger_module.write_log($"適応先： {dst_dir.FullName} " + ((src_rules.InheritanceFlags & InheritanceFlags.ContainerInherit) > 0 ? "このフォルダとサブフォルダ" : "このフォルダのみ"));
+
+                        comparsion_unit unit = comparison_list[account_name];
+                        loger_module.write_log($"変換対象アカウント： {unit.account_name} {unit.source_sid} → {unit.target_sid} | {src_rules.FileSystemRights.ToString()}");
+                        dst_dir_security.AddAccessRule(new FileSystemAccessRule(unit.target_sid,
                                                                                 src_rules.FileSystemRights,
                                                                                 src_rules.InheritanceFlags,
                                                                                 src_rules.PropagationFlags,
@@ -353,13 +358,13 @@ namespace copy_and_authorization_tool
                     }
                     else
                     {
-                        loger_module.write_log("適応先：" + ((src_rules.InheritanceFlags & InheritanceFlags.ContainerInherit) > 0 ? "このフォルダとサブフォルダ" : "このフォルダのみ"), "extracting");
-                        loger_module.write_log($"変換対象外アカウント：{src_rules.IdentityReference.ToString()} | {src_rules.FileSystemRights.ToString()}", "extracting");
+                        loger_module.write_log($"適応先： {dst_dir.FullName} " + ((src_rules.InheritanceFlags & InheritanceFlags.ContainerInherit) > 0 ? "このフォルダとサブフォルダ" : "このフォルダのみ"));
+                        loger_module.write_log($"変換対象外アカウント：{account_name} | {src_rules.FileSystemRights.ToString()}", "extracting");
                         dst_dir_security.AddAccessRule(src_rules);
                     }
                 }
                 if (dst_dir_security.GetAccessRules(true, true, typeof(NTAccount)).Count > 0)
-                    Directory.SetAccessControl(dst_dir.FullName, dst_dir_security); // アクセス権の設定
+                    dst_dir.SetAccessControl(dst_dir_security); // アクセス権の設定
                 else
                     throw new Exception($"アクセス権の設定が無い : {src_dir.FullName}");
 
@@ -367,7 +372,7 @@ namespace copy_and_authorization_tool
             }
             catch (Exception e)
             {
-                loger_module.write_log(e.Message, "error", "info");
+                loger_module.write_log($"{e.GetType()} {e.Message}", "error", "info");
                 return false;
             }
 
@@ -388,13 +393,17 @@ namespace copy_and_authorization_tool
                 FileSecurity dst_file_security = dst_file.GetAccessControl();    // 移管先のアクセス権取得
                 foreach (FileSystemAccessRule src_rules in src_file_security.GetAccessRules(true, true, typeof(NTAccount)))
                 {
-                    loger_module.write_log($"{src_rules.IdentityReference.ToString()}");
-                    loger_module.write_log("適応先：" + ((src_rules.InheritanceFlags & InheritanceFlags.ContainerInherit) > 0 ? "このフォルダとサブフォルダ" : "このフォルダのみ"));
-                    if (comparison_list.ContainsKey(src_rules.IdentityReference.ToString()))
+                    int cat_pint = src_rules.IdentityReference.ToString().LastIndexOf('\\') + 1;
+                    string account_name = src_rules.IdentityReference.ToString().Substring(cat_pint);
+                    loger_module.write_log($"{account_name}");
+                    if (comparison_list.ContainsKey(account_name))
                     {
+                        loger_module.write_log($"適応先： {dst_file.FullName} " + ((src_rules.InheritanceFlags & InheritanceFlags.ContainerInherit) > 0 ? "このフォルダとサブフォルダ" : "このフォルダのみ"));
+
                         // 変換対象があれば、S-IDを変換して登録
-                        loger_module.write_log($"変換対象アカウント：{src_rules.IdentityReference.ToString()} → {comparison_list[src_rules.IdentityReference.ToString()].target_sid} | {src_rules.FileSystemRights.ToString()}");
-                        dst_file_security.AddAccessRule(new FileSystemAccessRule(comparison_list[src_rules.IdentityReference.ToString()].target_sid,
+                        comparsion_unit unit = comparison_list[account_name];
+                        loger_module.write_log($"変換対象アカウント： {unit.account_name} {unit.source_sid} → {unit.target_sid} | {src_rules.FileSystemRights.ToString()}");
+                        dst_file_security.AddAccessRule(new FileSystemAccessRule(unit.target_sid,
                                                                                     src_rules.FileSystemRights,
                                                                                     src_rules.InheritanceFlags,
                                                                                     src_rules.PropagationFlags,
@@ -402,13 +411,13 @@ namespace copy_and_authorization_tool
                     }
                     else
                     {
-                        loger_module.write_log("適応先：" + ((src_rules.InheritanceFlags & InheritanceFlags.ContainerInherit) > 0 ? "このフォルダとサブフォルダ" : "このフォルダのみ"), "extracting");
-                        loger_module.write_log($"変換対象外アカウント：{src_rules.IdentityReference.ToString()} | {src_rules.FileSystemRights.ToString()}", "extracting");
+                        loger_module.write_log($"適応先： {dst_file.FullName} " + ((src_rules.InheritanceFlags & InheritanceFlags.ContainerInherit) > 0 ? "このフォルダとサブフォルダ" : "このフォルダのみ"), "extracting");
+                        loger_module.write_log($"変換対象外アカウント：{account_name} | {src_rules.FileSystemRights.ToString()}", "extracting");
                         dst_file_security.AddAccessRule(src_rules); // 変換対象が無ければ、移管元の権限そのまま移管
                     }
                 }
                 if (dst_file_security.GetAccessRules(true, true, typeof(NTAccount)).Count > 0)
-                    File.SetAccessControl(dst_file.FullName, dst_file_security);
+                    dst_file.SetAccessControl(dst_file_security);
                 else
                     throw new Exception($"アクセス権の設定が無い : {src_file.FullName}");
 
