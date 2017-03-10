@@ -184,7 +184,7 @@ namespace copy_and_authorization_tool
         {
             // コピー元、コピー先何れかが共有フォルダであれば処理を行う
             // 両方共有フォルダだった場合は処理を行わない
-            if (src_dir.StartsWith("\\\\") ^ dst_dir.StartsWith("\\\\")) return ;
+            if (src_dir.StartsWith("\\\\") == dst_dir.StartsWith("\\\\")) return ;
             if (user_id.Equals("") || user_pw.Equals("")) return ;
 
             string target_name = src_dir.StartsWith("\\\\") ? src_dir : dst_dir;
