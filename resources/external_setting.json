@@ -30,6 +30,7 @@
     "resource_excel_fail" : "",
     "open_sheet_name" : "",
     "open_list_offset" : "",
+    "destination_domain" : "",
 
     "export_xml_filename" : "comparison_list.xml",
 

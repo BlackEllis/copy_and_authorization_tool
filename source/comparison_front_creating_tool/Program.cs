@@ -213,10 +213,12 @@ namespace comparison_front_creating_tool
 
             comparison_table compari_table = new comparison_table();
 
-            active_direcory_module ad_obj = get_ad_object();
+            active_direcory_module ad_obj = get_ad_object(); // 移動う元ADからグループ情報を取得
             mysql_module mysql = create_mysql_module();
-            Dictionary<string, group_info> group_infos = get_group_infos_from_ad();
+            Dictionary<string, group_info> group_infos = get_group_infos_from_destination_ad(); // 移動先ADから取得したグループ情報の取得
             string ad_account_name_filter = get_value_from_json("dst_account_name_filter");
+            string destination_domain = get_value_from_json("destination_domain");
+            if (!destination_domain.Equals("")) destination_domain += "\\";
 
             if ((group_infos == null) || (group_infos.Count == 0))
             {
@@ -224,7 +226,7 @@ namespace comparison_front_creating_tool
                 return null;
             }
 
-            foreach (KeyValuePair<string, group_info> ad_group_membars in ad_obj.groups_list)
+            foreach (KeyValuePair<string, group_info> ad_group_membars in ad_obj.groups_list) // 移動元ADから取得したグループ情報を元にループ
             {
                 // グループ情報の追加
                 string query_str = $"Name = '{ad_group_membars.Key}'";
@@ -240,8 +242,8 @@ namespace comparison_front_creating_tool
 
                             comparsion_unit unit = new comparsion_unit();
                             unit.account_name = ad_group_membars.Value.account_name;
-                            unit.source_sid = ad_group_membars.Value.sid;
-                            unit.target_sid = group_infos[group_name].sid;
+                            unit.conversion_original = ad_group_membars.Value.sid;
+                            unit.after_conversion = destination_domain + group_name;
 
                             if (!compari_table.comparsion_units.Contains(unit))
                                 compari_table.comparsion_units.Add(unit);
@@ -267,7 +269,7 @@ namespace comparison_front_creating_tool
                         var users = user_info.get_user_infos(mysql.connection_sql_str(), membar_user.account_name);
                         if ((users == null) || (users.Count == 0)) continue;
 
-                        comparsion_unit unit = new comparsion_unit(membar_user, users[0]);
+                        comparsion_unit unit = new comparsion_unit(membar_user, users[0], membar_user.account_name, destination_domain + users[0].account_name);
                         if (!compari_table.comparsion_units.Contains(unit))
                             compari_table.comparsion_units.Add(unit);
                     }
@@ -319,7 +321,7 @@ namespace comparison_front_creating_tool
         /// ADからグループ一覧の取得
         /// </summary>
         /// <returns></returns>
-        private static Dictionary<string, group_info> get_group_infos_from_ad()
+        private static Dictionary<string, group_info> get_group_infos_from_destination_ad()
         {
             Func<string, char, string[]> isolat_from_str = (string src_str, char delimiter) =>
             {

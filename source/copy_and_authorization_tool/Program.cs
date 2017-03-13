@@ -349,8 +349,8 @@ namespace copy_and_authorization_tool
                         loger_module.write_log($"適応先： {dst_dir.FullName} " + ((src_rules.InheritanceFlags & InheritanceFlags.ContainerInherit) > 0 ? "このフォルダとサブフォルダ" : "このフォルダのみ"));
 
                         comparsion_unit unit = comparison_list[account_name];
-                        loger_module.write_log($"変換対象アカウント： {unit.account_name} {unit.source_sid} → {unit.target_sid} | {src_rules.FileSystemRights.ToString()}");
-                        dst_dir_security.AddAccessRule(new FileSystemAccessRule(unit.target_sid,
+                        loger_module.write_log($"変換対象アカウント： {unit.account_name} {unit.conversion_original} → {unit.after_conversion} | {src_rules.FileSystemRights.ToString()}");
+                        dst_dir_security.AddAccessRule(new FileSystemAccessRule(unit.after_conversion,
                                                                                 src_rules.FileSystemRights,
                                                                                 src_rules.InheritanceFlags,
                                                                                 src_rules.PropagationFlags,
@@ -402,8 +402,8 @@ namespace copy_and_authorization_tool
 
                         // 変換対象があれば、S-IDを変換して登録
                         comparsion_unit unit = comparison_list[account_name];
-                        loger_module.write_log($"変換対象アカウント： {unit.account_name} {unit.source_sid} → {unit.target_sid} | {src_rules.FileSystemRights.ToString()}");
-                        dst_file_security.AddAccessRule(new FileSystemAccessRule(unit.target_sid,
+                        loger_module.write_log($"変換対象アカウント： {unit.account_name} {unit.conversion_original} → {unit.after_conversion} | {src_rules.FileSystemRights.ToString()}");
+                        dst_file_security.AddAccessRule(new FileSystemAccessRule(unit.after_conversion,
                                                                                     src_rules.FileSystemRights,
                                                                                     src_rules.InheritanceFlags,
                                                                                     src_rules.PropagationFlags,

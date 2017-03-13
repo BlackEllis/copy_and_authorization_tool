@@ -20,7 +20,7 @@ namespace tool_commons.model
             if (comparsion_units == null) return null;
             foreach (comparsion_unit unit in comparsion_units)
             {
-                dst_dictionary.Add(unit.source_sid, unit);
+                dst_dictionary.Add(unit.conversion_original, unit);
             }
             return dst_dictionary;
         }
@@ -43,18 +43,18 @@ namespace tool_commons.model
         public string affiliation { get; set; }
         [System.Xml.Serialization.XmlElement("job_title")]
         public string job_title { get; set; }
-        [System.Xml.Serialization.XmlElement("source_sid")]
-        public string source_sid { get; set; }
-        [System.Xml.Serialization.XmlElement("target_sid")]
-        public string target_sid { get; set; }
         [System.Xml.Serialization.XmlElement("del_flg")]
         public int del_flg { get; set; }
+        [System.Xml.Serialization.XmlElement("conversion_original")]
+        public string conversion_original { get; set; }
+        [System.Xml.Serialization.XmlElement("after_conversion")]
+        public string after_conversion { get; set; }
 
         /// <summary>
         ///  コンストラクタ
         /// </summary>
         public comparsion_unit() { }
-        public comparsion_unit(user_info source, user_info target)
+        public comparsion_unit(user_info source, user_info target, string src_conversion_original, string src_after_conversion)
         {
             account_name = target.account_name;
             first_name = target.first_name;
@@ -62,8 +62,8 @@ namespace tool_commons.model
             mailaddress = target.mailaddress;
             affiliation = target.affiliation;
             job_title = target.job_title;
-            source_sid = source.sid;
-            target_sid = target.sid;
+            conversion_original = src_conversion_original;
+            after_conversion = src_after_conversion;
             del_flg = target.del_flg;
         }
 
