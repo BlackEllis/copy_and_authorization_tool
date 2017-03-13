@@ -12,7 +12,7 @@ robocopyとコピーしたアクセス権の移植プログラム
 
 4. コピーしたディレクトリ、ファイルに元ファイルについていた権限の移植
 
-    > この際にS-ID変換対象が含まれていた場合は変換して登録を行う
+    > 変換比較用のファイルは _comparison_front_creating_tool_ で行う
 
 ## comparison_front_creating_tool
 ### 概要
