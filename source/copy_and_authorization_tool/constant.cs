@@ -22,7 +22,7 @@ namespace copy_and_authorization_tool
         public const string LOG_FILE_ENCODE = "utf-8";                      // 出力ログファイルのデフォルト文字コード
         public const string DEFAULT_LOG_FILENAME = "system.log";            // 出力ログファイルのデフォルト名
 
-        // error ファイル関係定数
+        // extracting ファイル関係定数
         public const string EXTRACTING_FILE_ENCODE = "utf-8";                // 出力抽出ログファイルのデフォルト文字コード
         public const string DEFAULT_EXTRACTING_FILENAME = "errors.log";      // 出力抽出ログファイルのデフォルト名
 
