@@ -28,11 +28,11 @@ namespace tool_commons.modules
         /// <param name="remain_hiierarch">取得階層</param>
         public void get_group_list(string host, string[] common_names, string[] organizational_units, string user="", string pass="")
         {
-            DirectoryEntry objADAM = default(DirectoryEntry);
-            DirectoryEntry objGroupEntry = default(DirectoryEntry);
-            DirectorySearcher objSearchADAM = default(DirectorySearcher);
-            SearchResultCollection objSearchResults = default(SearchResultCollection);
-            SearchResult myResult = null;
+            DirectoryEntry obj_adam = default(DirectoryEntry);
+            DirectoryEntry obj_entry = default(DirectoryEntry);
+            DirectorySearcher obj_search_adam = default(DirectorySearcher);
+            SearchResultCollection obj_search_results = default(SearchResultCollection);
+            SearchResult my_result = null;
             List<active_direcory_module> dst_list = new List<active_direcory_module>();
 
             // Enumerate groups
@@ -40,31 +40,31 @@ namespace tool_commons.modules
             {
                 string ldap_url = create_ldap_url_str(host, common_names, organizational_units);
                 if (ldap_url != null)
-                    objADAM = new DirectoryEntry(create_ldap_url_str(host, common_names, organizational_units), user, pass);
+                    obj_adam = new DirectoryEntry(create_ldap_url_str(host, common_names, organizational_units), user, pass);
                 else
-                    objADAM = new DirectoryEntry();
+                    obj_adam = new DirectoryEntry();
 
-                objADAM.RefreshCache();
-                objSearchADAM = new DirectorySearcher(objADAM);
-                objSearchADAM.Filter = "(&(objectClass=group))";
-                objSearchADAM.SearchScope = SearchScope.Subtree;
-                objSearchResults = objSearchADAM.FindAll();
+                obj_adam.RefreshCache();
+                obj_search_adam = new DirectorySearcher(obj_adam);
+                obj_search_adam.Filter = "(&(objectClass=group))";
+                obj_search_adam.SearchScope = SearchScope.Subtree;
+                obj_search_results = obj_search_adam.FindAll();
 
-                if (objSearchResults.Count == 0)
+                if (obj_search_results.Count == 0)
                     throw new Exception("No groups found");
 
                 if (groups == null)
                     groups = new Dictionary<string, group_info>();
 
-                foreach (SearchResult objResult in objSearchResults)
+                foreach (SearchResult objResult in obj_search_results)
                 {
-                    myResult = objResult;
-                    objGroupEntry = objResult.GetDirectoryEntry();
-                    var group_name = objGroupEntry.Properties["sAMAccountName"].Value.ToString();
-                    var sid = new SecurityIdentifier((byte[])objGroupEntry.Properties["objectSid"][0], 0).ToString();
+                    my_result = objResult;
+                    obj_entry = objResult.GetDirectoryEntry();
+                    string group_name = obj_entry.Properties["sAMAccountName"].Value.ToString();
+                    string sid = new SecurityIdentifier((byte[])obj_entry.Properties["objectSid"][0], 0).ToString();
                     if (!groups.ContainsKey(group_name))
                         groups.Add(group_name, new group_info(group_name, sid));
-                    ExpandGroup(objGroupEntry, user, pass);
+                    ExpandGroup(obj_entry, user, pass);
                 }
 
             }
@@ -110,8 +110,8 @@ namespace tool_commons.modules
                     {
                         user_info user_obj = new user_info(result.GetDirectoryEntry());
                         ExpandGroup(create_entry_obj(result.Path, user, pass), user, pass);
-                        var group_name = group.Properties["sAMAccountName"].Value.ToString();
-                        var sid = new SecurityIdentifier((byte[])group.Properties["objectSid"][0], 0).ToString();
+                        string group_name = group.Properties["sAMAccountName"].Value.ToString();
+                        string sid = new SecurityIdentifier((byte[])group.Properties["objectSid"][0], 0).ToString();
                         if (groups.ContainsKey(group_name))
                         {
                             groups[group_name].add_user_info(user_obj);
@@ -178,8 +178,8 @@ namespace tool_commons.modules
                 foreach (SearchResult obj in objs)
                 {
                     DirectoryEntry obj_entry = obj.GetDirectoryEntry();
-                    var group_name = obj_entry.Properties["sAMAccountName"].Value.ToString();
-                    var sid = new SecurityIdentifier((byte[])obj_entry.Properties["objectSid"][0], 0).ToString();
+                    string group_name = obj_entry.Properties["sAMAccountName"].Value.ToString();
+                    string sid = new SecurityIdentifier((byte[])obj_entry.Properties["objectSid"][0], 0).ToString();
                     group_info group_obj = new group_info(group_name, sid);
                     if (group_obj.account_name.Length > 0)
                         dst_dictionary.Add(group_name, group_obj);

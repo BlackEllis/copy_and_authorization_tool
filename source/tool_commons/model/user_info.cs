@@ -160,7 +160,7 @@ namespace tool_commons.model
         public bool Equals(user_info comparison_source)
         {
             if (comparison_source == null) return false;
-            return this.account_name == comparison_source.account_name;
+            return (this.account_name == comparison_source.account_name) && (this.sid == comparison_source.sid);
         }
     }
 }
