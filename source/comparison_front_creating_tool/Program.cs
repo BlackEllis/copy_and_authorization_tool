@@ -204,6 +204,8 @@ namespace comparison_front_creating_tool
             Func<string, string, string> transform_str_to_cug = (string src_str, string account_name_filter) =>
             {
                 string trim_str = src_str.Trim(); // 前後の空白を排除
+                if (trim_str.Equals("")) return "";
+
                 int all_appear_position = account_name_filter.LastIndexOf('*'); // フィルターでしてした＊の出現位置取得
                 if (all_appear_position == -1) return "";
 
@@ -238,12 +240,17 @@ namespace comparison_front_creating_tool
                         try
                         {
                             string group_name = transform_str_to_cug(result_row["CUGコード"].ToString(), ad_account_name_filter);
-                            if (!group_infos.ContainsKey(group_name)) throw new Exception($"ADから取得した情報に該当するグループがありません グループ名: {ad_group_membars.Value.account_name}");
-
                             comparsion_unit unit = new comparsion_unit();
                             unit.account_name = ad_group_membars.Value.account_name;
                             unit.conversion_original = ad_group_membars.Value.sid;
-                            unit.after_conversion = destination_domain + group_name;
+
+                            if (!group_infos.ContainsKey(group_name)) // CUGコードがリソースに設定されてなければ、移行対象外とする
+                            {
+                                unit.after_conversion = "";
+                                unit.del_flg = 1;
+                            }
+                            else
+                                unit.after_conversion = destination_domain + group_name;
 
                             if (!compari_table.comparsion_units.Contains(unit))
                                 compari_table.comparsion_units.Add(unit);
