@@ -346,9 +346,15 @@ namespace copy_and_authorization_tool
                     string account_name = src_rules.IdentityReference.ToString().Substring(cat_pint);
                     if (comparison_list.ContainsKey(account_name))
                     {
-                        loger_module.write_log($"適応先： {dst_dir.FullName} " + ((src_rules.InheritanceFlags & InheritanceFlags.ContainerInherit) > 0 ? "このフォルダとサブフォルダ" : "このフォルダのみ"), "conversion", "info");
 
+                        loger_module.write_log($"適応先： {dst_dir.FullName} " + ((src_rules.InheritanceFlags & InheritanceFlags.ContainerInherit) > 0 ? "このフォルダとサブフォルダ" : "このフォルダのみ"), "conversion", "info");
                         comparsion_unit unit = comparison_list[account_name];
+                        if (comparison_list[account_name].del_flg == 1)
+                        {
+                            loger_module.write_log($"削除対象アカウント： {unit.account_name} {unit.conversion_original} | {src_rules.FileSystemRights.ToString()}", "conversion", "info");
+                            continue; // del_flgが1のものは権限設定処理を行わない
+                        }
+
                         loger_module.write_log($"変換対象アカウント： {unit.account_name} {unit.conversion_original} → {unit.after_conversion} | {src_rules.FileSystemRights.ToString()}", "conversion", "info");
                         dst_dir_security.AddAccessRule(new FileSystemAccessRule(unit.after_conversion,
                                                                                 src_rules.FileSystemRights,
@@ -399,9 +405,14 @@ namespace copy_and_authorization_tool
                     if (comparison_list.ContainsKey(account_name))
                     {
                         loger_module.write_log($"適応先： {dst_file.FullName} " + ((src_rules.InheritanceFlags & InheritanceFlags.ContainerInherit) > 0 ? "このフォルダとサブフォルダ" : "このフォルダのみ"), "conversion", "info");
-
-                        // 変換対象があれば、S-IDを変換して登録
+                        
                         comparsion_unit unit = comparison_list[account_name];
+                        if (comparison_list[account_name].del_flg == 1)
+                        {
+                            loger_module.write_log($"削除対象アカウント： {unit.account_name} {unit.conversion_original} | {src_rules.FileSystemRights.ToString()}", "conversion", "info");
+                            continue; // del_flgが1のものは権限設定処理を行わない
+                        }
+
                         loger_module.write_log($"変換対象アカウント： {unit.account_name} {unit.conversion_original} → {unit.after_conversion} | {src_rules.FileSystemRights.ToString()}", "conversion", "info");
                         dst_file_security.AddAccessRule(new FileSystemAccessRule(unit.after_conversion,
                                                                                     src_rules.FileSystemRights,
