@@ -3,7 +3,7 @@
     "default_log_filename" : "system.log",
 
     "extracting_file_encode" : "utf-8",
-    "default_extracting_filename" : "errors.log",
+    "default_extracting_filename" : "extract.log",
 
     "log_file_dir" : "./log/",
     "export_dir" : "./export/",
