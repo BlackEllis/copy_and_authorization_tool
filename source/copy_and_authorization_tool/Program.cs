@@ -266,6 +266,7 @@ namespace copy_and_authorization_tool
         /// <param name="src_dir">移管元開始ディレクトリフルパス</param>
         /// <param name="dst_dir">移管先開始ディレクトリフルパス</param>
         /// <param name="comparison_list">変換対象リスト</param>
+        /// <param name="exception_list">対象外リスト</param>
         /// <returns></returns>
         private static bool conversion_association(string src_dir, string dst_dir, ref Dictionary<string, comparsion_unit> comparison_list, ref List<string> exception_list)
         {
