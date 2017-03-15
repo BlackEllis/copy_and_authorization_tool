@@ -16,13 +16,13 @@ namespace tool_commons.modules
         /// </summary>
         /// <param name="key">要素名</param>
         /// <returns>指定された要素の値</returns>
-        public static string get_external_resource(string key)
+        public static string get_external_resource(string key, string default_value = "")
         {
-            if (_external_resources == null) return "";
+            if (_external_resources == null) return default_value;
             if (_external_resources.ContainsKey(key))
                 return _external_resources[key];
             else
-                return "";
+                return default_value;
         }
 
         /// <summary>
@@ -30,13 +30,13 @@ namespace tool_commons.modules
         /// </summary>
         /// <param name="key">要素名</param>
         /// <returns>指定された要素の配列</returns>
-        public static List<string> get_external_resource_list(string key)
+        public static List<string> get_external_resource_list(string key, List<string> default_value = null)
         {
-            if (_external_resources_list == null) return null;
+            if (_external_resources_list == null) return default_value;
             if (_external_resources_list.ContainsKey(key))
                 return _external_resources_list[key];
             else
-                return null;
+                return default_value;
         }
 
         /// <summary>

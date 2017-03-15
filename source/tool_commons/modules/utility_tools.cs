@@ -129,5 +129,21 @@ namespace tool_commons.modules
 
             return result.ToString();
         }
+
+        /// <summary>
+        /// 引数の連想配列値か引数の基本値から値を取り出す
+        /// </summary>
+        /// <param name="src_array">取り出す連想配列</param>
+        /// <param name="key">連想配列のキー情報</param>
+        /// <param name="default_value">基本値</param>
+        /// <returns></returns>
+        public static string get_value_from_hasharray(Dictionary<string, string> src_array, string key, string default_value)
+        {
+            if (src_array == null) return default_value;
+            if (src_array.ContainsKey(key))
+                return src_array[key];
+            else
+                return default_value;
+        }
     }
 }

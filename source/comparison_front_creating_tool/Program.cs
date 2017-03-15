@@ -29,9 +29,9 @@ namespace comparison_front_creating_tool
                 Console.WriteLine("read setting from json : end");
 
                 // 各外部ファイルのディレクトリ先を設定
-                string log_dir = get_value_from_json("log_file_dir", constant.LOG_FILE_DIR);
-                string export_dir = get_value_from_json("export_dir", constant.EXPORT_DIR);
-                string resources_dir = get_value_from_hasharray(hash_array, "RESOURCES_DIR", constant.RESOURCES_DIR);
+                string log_dir = json_module.get_external_resource("log_file_dir", constant.LOG_FILE_DIR);
+                string export_dir = json_module.get_external_resource("export_dir", constant.EXPORT_DIR);
+                string resources_dir = utility_tools.get_value_from_hasharray(hash_array, "RESOURCES_DIR", constant.RESOURCES_DIR);
 
                 Console.WriteLine("setup log module : start");
                 setup_logs(hash_array, log_dir); // ログ、エラーファイルのセットアップ
@@ -47,12 +47,12 @@ namespace comparison_front_creating_tool
                     Console.WriteLine("storing AD User Infos : End");
                 }
 
-                string export_filename = get_value_from_json("export_xml_filename");
+                string export_filename = json_module.get_external_resource("export_xml_filename");
                 if (export_filename == "") throw new Exception("出力ファイル名が未定義");
 
                 // XMLへシリアライズ変換し出力
                 Console.WriteLine("Export AD User to Serialize : start");
-                export_serialize(compari_table, export_dir, get_value_from_json("export_xml_filename", constant.EXPORT_XML_FILENAME));
+                export_serialize(compari_table, export_dir, json_module.get_external_resource("export_xml_filename", constant.EXPORT_XML_FILENAME));
                 Console.WriteLine("Export AD User to Serialize : End");
 
                 loger_module.close();
@@ -67,36 +67,6 @@ namespace comparison_front_creating_tool
         }
 
         /// <summary>
-        /// 引数の連想配列値か引数の基本値から値を取り出す
-        /// </summary>
-        /// <param name="src_array">取り出す連想配列</param>
-        /// <param name="key">連想配列のキー情報</param>
-        /// <param name="default_value">基本値</param>
-        /// <returns></returns>
-        private static string get_value_from_hasharray(Dictionary<string, string> src_array, string key, string default_value)
-        {
-            if (src_array == null) return default_value;
-            if (src_array.ContainsKey(key))
-                return src_array[key];
-            else
-                return default_value;
-        }
-
-        /// <summary>
-        /// json_moduleから値を取り出す
-        /// </summary>
-        /// <param name="json_key">取出したいjsonキー情報</param>
-        /// <param name="default_value">基本値</param>
-        /// <returns></returns>
-        private static string get_value_from_json(string json_key, string default_value = "")
-        {
-            string dst_str = json_module.get_external_resource(json_key);
-            if (dst_str == "") dst_str = default_value;
-
-            return dst_str;
-        }
-
-        /// <summary>
         /// ログ、エラーファイルのセットアップ関数
         /// </summary>
         /// <param name="args">起動引数を連想配列にしたもの</param>
@@ -105,14 +75,14 @@ namespace comparison_front_creating_tool
         {
 
             // ログファイルの関係設定
-            string log_file = get_value_from_json("default_log_filename", constant.DEFAULT_LOG_FILENAME);
-            log_file = get_value_from_hasharray(args, constant.RESOURCES_KEY_LOG, log_file);
-            string log_encode = get_value_from_json("log_file_encode", constant.LOG_FILE_ENCODE);
+            string log_file = json_module.get_external_resource("default_log_filename", constant.DEFAULT_LOG_FILENAME);
+            log_file = utility_tools.get_value_from_hasharray(args, constant.RESOURCES_KEY_LOG, log_file);
+            string log_encode = json_module.get_external_resource("log_file_encode", constant.LOG_FILE_ENCODE);
 
             // エラーファイルの関係設定
-            string error_file = get_value_from_json("default_error_filename", constant.DEFAULT_ERROR_FILENAME);
-            error_file = get_value_from_hasharray(args, constant.RESOURCES_KEY_ERRORLOG, error_file);
-            string error_encode = get_value_from_json("error_file_encode", constant.ERROR_FILE_ENCODE);
+            string error_file = json_module.get_external_resource("default_error_filename", constant.DEFAULT_ERROR_FILENAME);
+            error_file = utility_tools.get_value_from_hasharray(args, constant.RESOURCES_KEY_ERRORLOG, error_file);
+            string error_encode = json_module.get_external_resource("error_file_encode", constant.ERROR_FILE_ENCODE);
 
 #if DEBUG
             loger_module.loger_setup(log_file, log_dir, log_encode, "info", true);
@@ -139,11 +109,11 @@ namespace comparison_front_creating_tool
             // ADからグループ
             var ad_obj = new active_direcory_module();
 
-            string ad_server_name = get_value_from_json("src_ad_server");
-            string ad_access_userid = get_value_from_json("src_access_userid");
-            string ad_access_userpw = get_value_from_json("src_access_passwd");
-            string ad_common_names = get_value_from_json("src_common_names");
-            string ad_organizational_units = get_value_from_json("src_organizational_units");
+            string ad_server_name = json_module.get_external_resource("src_ad_server");
+            string ad_access_userid = json_module.get_external_resource("src_access_userid");
+            string ad_access_userpw = json_module.get_external_resource("src_access_passwd");
+            string ad_common_names = json_module.get_external_resource("src_common_names");
+            string ad_organizational_units = json_module.get_external_resource("src_organizational_units");
 
             ad_obj.get_group_list(ad_server_name, isolat_from_str(ad_common_names, ','), isolat_from_str(ad_organizational_units, '\''), ad_access_userid, ad_access_userpw);
 
@@ -158,10 +128,10 @@ namespace comparison_front_creating_tool
         {
             try
             {
-                string db_host = get_value_from_json("db_server_name");
-                string db_name = get_value_from_json("db_name");
-                string db_user = get_value_from_json("db_userid");
-                string db_pass = get_value_from_json("db_passwd");
+                string db_host = json_module.get_external_resource("db_server_name");
+                string db_name = json_module.get_external_resource("db_name");
+                string db_user = json_module.get_external_resource("db_userid");
+                string db_pass = json_module.get_external_resource("db_passwd");
                 mysql_module mysql_connecer = mysql_module.setup_sql(db_host, db_name, db_user, db_pass);
 
                 return mysql_connecer;
@@ -182,9 +152,9 @@ namespace comparison_front_creating_tool
         {
             try
             {
-                string resource_excel_fail = get_value_from_json("resource_excel_fail");
-                string open_sheet_name = get_value_from_json("open_sheet_name");
-                string open_list_offset = get_value_from_json("open_list_offset");
+                string resource_excel_fail = json_module.get_external_resource("resource_excel_fail");
+                string open_sheet_name = json_module.get_external_resource("open_sheet_name");
+                string open_list_offset = json_module.get_external_resource("open_list_offset");
 
                 return excel_converter_module.read_excel_by_row(resource_excel_fail, resources_dir, open_sheet_name, int.Parse(open_list_offset));
             }
@@ -218,8 +188,8 @@ namespace comparison_front_creating_tool
             active_direcory_module ad_obj = get_ad_object(); // 移動う元ADからグループ情報を取得
             mysql_module mysql = create_mysql_module();
             Dictionary<string, group_info> group_infos = get_group_infos_from_destination_ad(); // 移動先ADから取得したグループ情報の取得
-            string ad_account_name_filter = get_value_from_json("dst_account_name_filter");
-            string destination_domain = get_value_from_json("destination_domain");
+            string ad_account_name_filter = json_module.get_external_resource("dst_account_name_filter");
+            string destination_domain = json_module.get_external_resource("destination_domain");
             if (!destination_domain.Equals("")) destination_domain += "\\";
 
             if ((group_infos == null) || (group_infos.Count == 0))
@@ -337,12 +307,12 @@ namespace comparison_front_creating_tool
                 return dst_strs;
             };
 
-            string ad_server_name = get_value_from_json("dst_ad_server");
-            string ad_access_userid = get_value_from_json("dst_access_userid");
-            string ad_access_userpw = get_value_from_json("dst_access_passwd");
-            string ad_common_names = get_value_from_json("dst_common_names");
-            string ad_organizational_units = get_value_from_json("dst_organizational_units");
-            string ad_account_name_filter = get_value_from_json("dst_account_name_filter");
+            string ad_server_name = json_module.get_external_resource("dst_ad_server");
+            string ad_access_userid = json_module.get_external_resource("dst_access_userid");
+            string ad_access_userpw = json_module.get_external_resource("dst_access_passwd");
+            string ad_common_names = json_module.get_external_resource("dst_common_names");
+            string ad_organizational_units = json_module.get_external_resource("dst_organizational_units");
+            string ad_account_name_filter = json_module.get_external_resource("dst_account_name_filter");
 
             return active_direcory_module.get_group_infos(ad_server_name,
                                                         isolat_from_str(ad_common_names, ','),

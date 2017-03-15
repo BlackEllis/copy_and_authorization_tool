@@ -22,16 +22,16 @@ namespace copy_and_authorization_tool
             {
                 Console.WriteLine("read setting from json : start");
                 json_module.setup(
-                    get_value_from_hasharray(hash_array,
+                    utility_tools.get_value_from_hasharray(hash_array,
                                             constant.RESOURCES_KEY_EXTERNAL,
                                             constant.RESOURCES_DIR + constant.EXTERNAL_RESOURCE_FILENAME)
                 );
                 Console.WriteLine("read setting from json : end");
 
                 // 各外部ファイルのディレクトリ先を設定
-                string log_dir = get_value_from_json("log_file_dir", constant.LOG_FILE_DIR);
-                string export_dir = get_value_from_json("export_dir", constant.EXPORT_DIR);
-                string resources_dir = get_value_from_hasharray(hash_array, "RESOURCES_DIR", constant.RESOURCES_DIR);
+                string log_dir = json_module.get_external_resource("log_file_dir", constant.LOG_FILE_DIR);
+                string export_dir = json_module.get_external_resource("export_dir", constant.EXPORT_DIR);
+                string resources_dir = utility_tools.get_value_from_hasharray(hash_array, "RESOURCES_DIR", constant.RESOURCES_DIR);
 
                 Console.WriteLine("log feature setup : start");
                 setup_logs(hash_array, log_dir); // ログ、エラーファイルのセットアップ
@@ -39,15 +39,15 @@ namespace copy_and_authorization_tool
 
                 // デシリアライズした結果を連想配列に格納
                 Console.WriteLine("deserialize to Dictionary : start");
-                Dictionary<string, comparsion_unit> comparison_list = inport_serialize(get_value_from_json("inport_xml_filename"), resources_dir)?.transform_to_dictionary();
+                Dictionary<string, comparsion_unit> comparison_list = inport_serialize(json_module.get_external_resource("inport_xml_filename"), resources_dir)?.transform_to_dictionary();
                 Console.WriteLine("deserialize to Dictionary : end");
 
-                string resouces_excel_file = get_value_from_json("copy_dir_comparison_file");
-                string copy_dir_info_sheet = get_value_from_json("copy_dir_info_sheet");
-                int copy_dir_info_sheet_offset = int.Parse(get_value_from_json("copy_dir_info_sheet_offset"));
+                string resouces_excel_file = json_module.get_external_resource("copy_dir_comparison_file");
+                string copy_dir_info_sheet = json_module.get_external_resource("copy_dir_info_sheet");
+                int copy_dir_info_sheet_offset = int.Parse(json_module.get_external_resource("copy_dir_info_sheet_offset"));
                 DataTable copy_info_table = excel_converter_module.read_excel_by_row(resouces_excel_file, resources_dir, copy_dir_info_sheet, copy_dir_info_sheet_offset);
-                string exception_copy_dir_sheet = get_value_from_json("exception_copy_dir_sheet");
-                int exception_copy_dir_sheet_offset = int.Parse(get_value_from_json("exception_copy_dir_sheet_offset"));
+                string exception_copy_dir_sheet = json_module.get_external_resource("exception_copy_dir_sheet");
+                int exception_copy_dir_sheet_offset = int.Parse(json_module.get_external_resource("exception_copy_dir_sheet_offset"));
                 DataTable exception_copy_table = excel_converter_module.read_excel_by_row(resouces_excel_file, resources_dir, exception_copy_dir_sheet, exception_copy_dir_sheet_offset);
 
                 List<string> exception_list = new List<string>();
@@ -59,7 +59,7 @@ namespace copy_and_authorization_tool
                 }
 
                 // robocopyをテストモードで動作させるか判定用パラメータ取得
-                bool diff_mode = bool.Parse(get_value_from_hasharray(hash_array, constant.RESOURCES_KEY_DIFF_MODE, "False"));
+                bool diff_mode = bool.Parse(utility_tools.get_value_from_hasharray(hash_array, constant.RESOURCES_KEY_DIFF_MODE, "False"));
 
                 // ロボコピー実行関数
                 foreach (DataRow row in copy_info_table.Rows)
@@ -92,37 +92,6 @@ namespace copy_and_authorization_tool
             Console.ReadKey();
         }
 
-
-        /// <summary>
-        /// 引数の連想配列値か引数の基本値から値を取り出す
-        /// </summary>
-        /// <param name="src_array">取り出す連想配列</param>
-        /// <param name="key">連想配列のキー情報</param>
-        /// <param name="default_value">基本値</param>
-        /// <returns></returns>
-        private static string get_value_from_hasharray(Dictionary<string, string> src_array, string key, string default_value)
-        {
-            if (src_array == null) return default_value;
-            if (src_array.ContainsKey(key))
-                return src_array[key];
-            else
-                return default_value;
-        }
-
-        /// <summary>
-        /// json_moduleから値を取り出す
-        /// </summary>
-        /// <param name="json_key">取出したいjsonキー情報</param>
-        /// <param name="default_value">基本値</param>
-        /// <returns></returns>
-        private static string get_value_from_json(string json_key, string default_value = "")
-        {
-            string dst_str = json_module.get_external_resource(json_key);
-            if (dst_str == "") dst_str = default_value;
-
-            return dst_str;
-        }
-
         /// <summary>
         /// ログ、エラーファイルのセットアップ関数
         /// </summary>
@@ -131,14 +100,14 @@ namespace copy_and_authorization_tool
         private static void setup_logs(Dictionary<string, string>args, string log_dir)
         {
             // ログファイルの関係設定
-            string log_file = get_value_from_json("default_log_filename", constant.DEFAULT_LOG_FILENAME);
-            log_file = get_value_from_hasharray(args, constant.RESOURCES_KEY_LOG, log_file);
-            string log_encode = get_value_from_json("log_file_encode", constant.LOG_FILE_ENCODE);
+            string log_file = json_module.get_external_resource("default_log_filename", constant.DEFAULT_LOG_FILENAME);
+            log_file = utility_tools.get_value_from_hasharray(args, constant.RESOURCES_KEY_LOG, log_file);
+            string log_encode = json_module.get_external_resource("log_file_encode", constant.LOG_FILE_ENCODE);
 
             // 抽出ログファイルの関係設定
-            string extracting_file = get_value_from_json("default_extracting_filename", constant.DEFAULT_EXTRACTING_FILENAME);
-            extracting_file = get_value_from_hasharray(args, constant.RESOURCES_KEY_EXTRACTINGLOG, extracting_file);
-            string extracting_encode = get_value_from_json("extracting_file_encode", constant.EXTRACTING_FILE_ENCODE);
+            string extracting_file = json_module.get_external_resource("default_extracting_filename", constant.DEFAULT_EXTRACTING_FILENAME);
+            extracting_file = utility_tools.get_value_from_hasharray(args, constant.RESOURCES_KEY_EXTRACTINGLOG, extracting_file);
+            string extracting_encode = json_module.get_external_resource("extracting_file_encode", constant.EXTRACTING_FILE_ENCODE);
 
 #if DEBUG
             loger_module.loger_setup(log_file, log_dir, log_encode, "info", true);
@@ -239,9 +208,9 @@ namespace copy_and_authorization_tool
                 using (Process p = new Process())
                 {
                     if (diff_mode)
-                        p.StartInfo.Arguments = string.Format("/C ROBOCOPY \"{0}\" \"{1}\" \"{2}\" /L" + get_value_from_json("robocopy_option") + exception_dir_str, src_dir, dst_dir, copy_filter);
+                        p.StartInfo.Arguments = string.Format("/C ROBOCOPY \"{0}\" \"{1}\" \"{2}\" /L" + json_module.get_external_resource("robocopy_option") + exception_dir_str, src_dir, dst_dir, copy_filter);
                     else
-                        p.StartInfo.Arguments = string.Format("/C ROBOCOPY \"{0}\" \"{1}\" \"{2}\"" + get_value_from_json("robocopy_option") + exception_dir_str, src_dir, dst_dir, copy_filter);
+                        p.StartInfo.Arguments = string.Format("/C ROBOCOPY \"{0}\" \"{1}\" \"{2}\"" + json_module.get_external_resource("robocopy_option") + exception_dir_str, src_dir, dst_dir, copy_filter);
                     p.StartInfo.FileName = "cmd.exe";
                     p.StartInfo.CreateNoWindow = true;
                     p.StartInfo.UseShellExecute = false;
