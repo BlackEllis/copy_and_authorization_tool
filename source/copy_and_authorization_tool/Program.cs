@@ -43,12 +43,15 @@ namespace copy_and_authorization_tool
                 Console.WriteLine("deserialize to Dictionary : end");
 
                 string resouces_excel_file = json_module.get_external_resource("copy_dir_comparison_file");
-                string copy_dir_info_sheet = json_module.get_external_resource("copy_dir_info_sheet");
-                int copy_dir_info_sheet_offset = int.Parse(json_module.get_external_resource("copy_dir_info_sheet_offset"));
-                DataTable copy_info_table = excel_converter_module.read_excel_by_row(resouces_excel_file, resources_dir, copy_dir_info_sheet, copy_dir_info_sheet_offset);
-                string exception_copy_dir_sheet = json_module.get_external_resource("exception_copy_dir_sheet");
-                int exception_copy_dir_sheet_offset = int.Parse(json_module.get_external_resource("exception_copy_dir_sheet_offset"));
-                DataTable exception_copy_table = excel_converter_module.read_excel_by_row(resouces_excel_file, resources_dir, exception_copy_dir_sheet, exception_copy_dir_sheet_offset);
+                DataTable copy_info_table = excel_converter_module.read_excel_by_row(resouces_excel_file, resources_dir, 
+                                                                                    json_module.get_external_resource("copy_dir_info_sheet"), 
+                                                                                    int.Parse(json_module.get_external_resource("copy_dir_info_sheet_offset")));
+                DataTable exception_copy_table = excel_converter_module.read_excel_by_row(resouces_excel_file, resources_dir, 
+                                                                                        json_module.get_external_resource("exception_copy_dir_sheet"),
+                                                                                        int.Parse(json_module.get_external_resource("exception_copy_dir_sheet_offset")));
+
+                if (copy_info_table == null) throw new Exception("コピー対比表情報取得に失敗しました");
+                if (exception_copy_table == null) throw new Exception("例外対象一覧の取得に失敗しました");
 
                 List<string> exception_list = new List<string>();
                 foreach (DataRow row in exception_copy_table.Rows)
@@ -85,9 +88,11 @@ namespace copy_and_authorization_tool
             }
             catch (Exception e)
             {
+                loger_module.write_log(e.Message, "error", "info");
                 Console.WriteLine(e.Message);
-
             }
+
+            loger_module.close();
             Console.WriteLine("press any key to exit.");
             Console.ReadKey();
         }
