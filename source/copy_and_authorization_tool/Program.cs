@@ -319,7 +319,7 @@ namespace copy_and_authorization_tool
 
                         loger_module.write_log($"適応先： {dst_dir.FullName} " + ((src_rules.InheritanceFlags & InheritanceFlags.ContainerInherit) > 0 ? "このフォルダとサブフォルダ" : "このフォルダのみ"), "conversion", "info");
                         comparsion_unit unit = comparison_list[account_name];
-                        if (comparison_list[account_name].del_flg == 1)
+                        if (unit.del_flg == 1)
                         {
                             loger_module.write_log($"削除対象アカウント： {unit.account_name} {unit.conversion_original} | {src_rules.FileSystemRights.ToString()}", "conversion", "info");
                             continue; // del_flgが1のものは権限設定処理を行わない
@@ -377,7 +377,7 @@ namespace copy_and_authorization_tool
                         loger_module.write_log($"適応先： {dst_file.FullName} " + ((src_rules.InheritanceFlags & InheritanceFlags.ContainerInherit) > 0 ? "このフォルダとサブフォルダ" : "このフォルダのみ"), "conversion", "info");
                         
                         comparsion_unit unit = comparison_list[account_name];
-                        if (comparison_list[account_name].del_flg == 1)
+                        if (unit.del_flg == 1)
                         {
                             loger_module.write_log($"削除対象アカウント： {unit.account_name} {unit.conversion_original} | {src_rules.FileSystemRights.ToString()}", "conversion", "info");
                             continue; // del_flgが1のものは権限設定処理を行わない
