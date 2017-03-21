@@ -23,7 +23,7 @@ namespace verification_tool
 
         // extracting ファイル関係定数
         public const string EXTRACTING_FILE_ENCODE = "utf-8";                // 出力抽出ログファイルのデフォルト文字コード
-        public const string DEFAULT_EXTRACTING_FILENAME = "errors.log";      // 出力抽出ログファイルのデフォルト名
+        public const string DEFAULT_EXTRACTING_FILENAME = "extract.log";      // 出力抽出ログファイルのデフォルト名
 
         // 固定ディレクトリ設定
         public const string RESOURCES_DIR = "./resources/";
