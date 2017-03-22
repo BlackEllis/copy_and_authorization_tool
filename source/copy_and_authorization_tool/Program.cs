@@ -268,15 +268,14 @@ namespace copy_and_authorization_tool
                 FileInfo[] dst_file_list = dst_dir_info.GetFiles();
                 foreach (var src_file in src_file_list)
                 {
-                    bool check_flg = false;
                     foreach (var dst_file in dst_file_list)
                     {
                         if (!dst_file.Name.Equals(src_file.Name)) continue;
 
-                        check_flg = file_authority_replacement(src_file, dst_file, ref comparison_list);
+                        if(!file_authority_replacement(src_file, dst_file, ref comparison_list))
+                            loger_module.write_log($"該当ファイルがコピーされていないか、アクセス権がありません。：{src_file.FullName}", "extracting");
                         break;
                     }
-                    if (!check_flg) loger_module.write_log($"該当ファイルがコピーされていないか、アクセス権がありません。：{src_file}", "extracting");
                 }
 
                 // フォルダを掘り下げる

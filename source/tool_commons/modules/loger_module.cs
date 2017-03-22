@@ -74,8 +74,8 @@ namespace tool_commons.modules
                     if (str == "") return true;
 
                     DateTime dt_obj = DateTime.Now;
-                    string write_str = dt_obj.ToString("HH:mm:ss.fff ");
-                    write_str += (!category.Equals("")) ? $"[{category}]" + ": " : "";
+                    string write_str = dt_obj.ToString("HH:mm:ss.fff\t");
+                    write_str += (!category.Equals("")) ? $"[{category}]" + ":\t" : "";
                     write_str += str;
 
                     st_write.Write(write_str);
