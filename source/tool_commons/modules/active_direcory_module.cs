@@ -70,7 +70,7 @@ namespace tool_commons.modules
             }
             catch (Exception e)
             {
-                loger_module.write_log(e.Message);
+                loger_manager.write_log(e.Message);
             }
         }
 
@@ -89,7 +89,7 @@ namespace tool_commons.modules
             }
             catch (Exception e)
             {
-                loger_module.write_log(e.Message, "error", "info");
+                loger_manager.write_log(e.Message, "error");
             }
         }
 
@@ -123,7 +123,7 @@ namespace tool_commons.modules
             }
             catch (Exception e)
             {
-                loger_module.write_log(e.Message, "error", "info");
+                loger_manager.write_log(e.Message, "error");
             }
 
         }
@@ -189,7 +189,7 @@ namespace tool_commons.modules
             }
             catch (Exception e)
             {
-                loger_module.write_log(e.Message, "error", "info");
+                loger_manager.write_log(e.Message, "error");
                 return null;
             }
         }
@@ -240,7 +240,7 @@ namespace tool_commons.modules
             }
             catch (Exception e)
             {
-                loger_module.write_log(e.Message, "error", "info");
+                loger_manager.write_log(e.Message, "error");
                 return null;
             }
 
@@ -284,7 +284,7 @@ namespace tool_commons.modules
             }
             catch (Exception e)
             {
-                loger_module.write_log(e.Message, "error", "info");
+                loger_manager.write_log(e.Message, "error");
                 return null;
             }
         }
@@ -298,11 +298,11 @@ namespace tool_commons.modules
             {
                 foreach (KeyValuePair<string, group_info> arrays in groups)
                 {
-                    loger_module.write_log(arrays.Key);
+                    loger_manager.write_log(arrays.Key);
                     foreach (user_info obj in arrays.Value.group_members)
                         obj.disp_parameters("\t");
                 }
-                loger_module.write_log("");
+                loger_manager.write_log("");
             }
         }
     }

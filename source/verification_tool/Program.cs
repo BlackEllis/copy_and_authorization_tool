@@ -81,11 +81,11 @@ namespace verification_tool
             }
             catch (Exception e)
             {
-                loger_module.write_log(e.Message, "error", "info");
+                loger_manager.write_log(e.Message, "error");
                 Console.WriteLine(e.Message);
             }
 
-            loger_module.close();
+            loger_manager.close();
             Console.WriteLine("press any key to exit.");
             Console.ReadKey();
         }
@@ -107,12 +107,13 @@ namespace verification_tool
             extracting_file = utility_tools.get_value_from_hasharray(args, constant.RESOURCES_KEY_EXTRACTINGLOG, extracting_file);
             string extracting_encode = json_module.get_external_resource("extracting_file_encode", constant.EXTRACTING_FILE_ENCODE);
 
+            loger_manager.setup_manager();
 #if DEBUG
-            loger_module.loger_setup(log_file, log_dir, log_encode, "info", true);
-            loger_module.loger_setup(extracting_file, log_dir, extracting_encode, "extracting", true);
+            loger_manager.add_stream("info", log_file, log_dir, log_encode, loger_module.E_LOG_LEVEL.E_ALL, true);
+            loger_manager.add_stream("extracting", extracting_file, log_dir, extracting_encode, loger_module.E_LOG_LEVEL.E_ALL, true);
 #else
-            loger_module.loger_setup(log_file, log_dir, log_encode, "info");
-            loger_module.loger_setup(extracting_file, log_dir, extracting_encode, "extracting");
+            loger_manager.add_stream("info", log_file, log_dir, log_encode, loger_module.E_LOG_LEVEL.E_ERROR | loger_module.E_LOG_LEVEL.E_WARNING);
+            loger_manager.add_stream("extracting", extracting_file, log_dir, extracting_encode, loger_module.E_LOG_LEVEL.E_ALL);
 #endif
         }
 
@@ -135,7 +136,7 @@ namespace verification_tool
             }
             catch (Exception e)
             {
-                loger_module.write_log(e.Message, "error", "info");
+                loger_manager.write_log(e.Message, "error");
                 return null;
             }
         }
@@ -172,9 +173,9 @@ namespace verification_tool
                 p.StartInfo.RedirectStandardOutput = true;
                 p.StartInfo.RedirectStandardError = true;
                 p.Start();
-                loger_module.write_log(p.StartInfo.Arguments);
-                loger_module.write_log(p.StandardOutput.ReadToEnd());
-                loger_module.write_log(p.StandardError.ReadToEnd(), "error", "info");
+                loger_manager.write_log(p.StartInfo.Arguments);
+                loger_manager.write_log(p.StandardOutput.ReadToEnd());
+                loger_manager.write_log(p.StandardError.ReadToEnd(), "error");
                 p.WaitForExit();
             }
         }
@@ -200,7 +201,7 @@ namespace verification_tool
 
                 if (exception_list.Contains(foldername))
                 {
-                    loger_module.write_log($"例外対象: {src_dir_info.FullName}", "exception", "info");
+                    loger_manager.write_log($"例外対象: {src_dir_info.FullName}", "exception");
                     return true;
                 }
 
@@ -218,7 +219,7 @@ namespace verification_tool
                         if (!dst_file.Name.Equals(src_file.Name)) continue; // ファイル名が一致しなければ後の処理をスキップ
 
                         if (!file_permission_comparative(src_file, dst_file, ref comparison_list)) // ファイルの権限比較
-                            loger_module.write_log($"該当ファイルがコピーされていないか、アクセス権がありません。ファイル名： {src_file}", "error", "extracting");
+                            loger_manager.write_log($"該当ファイルがコピーされていないか、アクセス権がありません。ファイル名： {src_file.FullName}", "error", "extracting");
                         break;
                     }
                 }
@@ -240,7 +241,7 @@ namespace verification_tool
             }
             catch (Exception e)
             {
-                loger_module.write_log(e.Message, "error", "info");
+                loger_manager.write_log(e.Message, "error");
                 return false;
             }
         }
@@ -292,7 +293,7 @@ namespace verification_tool
                         comparsion_unit unit = comparison_list[account_name];
                         if (unit.del_flg == 1)
                         {
-                            loger_module.write_log($"削除対象アカウント： {unit.account_name} {unit.conversion_original} | {src_rule.FileSystemRights.ToString()}", "del account", "info");
+                            loger_manager.write_log($"削除対象アカウント： {unit.account_name} {unit.conversion_original} | {src_rule.FileSystemRights.ToString()}");
                             continue;
                         }
 
@@ -301,7 +302,7 @@ namespace verification_tool
                     }
 
                     if (!check_permission_of_dstdir(comparative_authority)) // コピー先に権限があるか判定
-                        loger_module.write_log($"コピー元フォルダ名： {src_dir.FullName}\tコピー先フォルダ名： {dst_dir.FullName}\tアカウント名： {comparative_authority.IdentityReference}", "diff", "extracting");
+                        loger_manager.write_log($"コピー元フォルダ名： {src_dir.FullName}\tコピー先フォルダ名： {dst_dir.FullName}\tアカウント名： {comparative_authority.IdentityReference}", "diff", "extracting");
 
                 }
 
@@ -309,7 +310,7 @@ namespace verification_tool
             }
             catch (Exception e)
             {
-                loger_module.write_log($"{e.GetType()} {e.Message}", "error", "info");
+                loger_manager.write_log($"{e.GetType()} {e.Message}", "error");
                 return false;
             }
 
@@ -360,12 +361,12 @@ namespace verification_tool
 
                     if (comparison_list.ContainsKey(account_name))
                     {
-                        loger_module.write_log($"適応先： {dst_file.FullName} " + ((src_rule.InheritanceFlags & InheritanceFlags.ContainerInherit) > 0 ? "このフォルダとサブフォルダ" : "このフォルダのみ"), "conversion", "info");
+                        loger_manager.write_log($"適応先： {dst_file.FullName} " + ((src_rule.InheritanceFlags & InheritanceFlags.ContainerInherit) > 0 ? "このフォルダとサブフォルダ" : "このフォルダのみ"), "conversion");
 
                         comparsion_unit unit = comparison_list[account_name];
                         if (unit.del_flg == 1)
                         {
-                            loger_module.write_log($"削除対象アカウント： {unit.account_name} {unit.conversion_original} | {src_rule.FileSystemRights.ToString()}", "del account", "info");
+                            loger_manager.write_log($"削除対象アカウント： {unit.account_name} {unit.conversion_original} | {src_rule.FileSystemRights.ToString()}", "del account");
                             continue; // del_flgが1のものは権限設定処理を行わない
                         }
 
@@ -374,14 +375,14 @@ namespace verification_tool
                     }
 
                     if (!check_permission_of_dstfile(comparative_authority)) // コピー先に権限があるか判定
-                        loger_module.write_log($"コピー元ファイル名： {src_file.FullName}\tコピー先ファイル名： {dst_file.FullName}\tアカウント名： {comparative_authority.IdentityReference}", "diff", "extracting");
+                        loger_manager.write_log($"コピー元ファイル名： {src_file.FullName}\tコピー先ファイル名： {dst_file.FullName}\tアカウント名： {comparative_authority.IdentityReference}", "diff", "extracting");
                 }
 
                 return true;
             }
             catch (Exception e)
             {
-                loger_module.write_log(e.Message, "error", "info");
+                loger_manager.write_log(e.Message, "error");
                 return false;
             }
         }

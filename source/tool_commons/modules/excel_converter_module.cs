@@ -69,7 +69,7 @@ namespace tool_commons.modules
             }
             catch (Exception e)
             {
-                loger_module.write_log(e.Message, "error", "info");
+                loger_manager.write_log(e.Message, "error");
                 return null;
             }
         }

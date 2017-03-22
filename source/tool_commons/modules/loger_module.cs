@@ -1,29 +1,34 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 
 namespace tool_commons.modules
 {
-    sealed class loger_module
+    class loger_module
     {
-        private static Dictionary<string, System.IO.StreamWriter> _stream_list;
+        public enum E_LOG_LEVEL
+        {
+            E_ALL = 0xff,
+            E_ERROR = 0x01,
+            E_WARNING = 0x02,
+            E_INFO = 0x04,
+            E_USER_LOG = 0x08,
+        };
+
+        private E_LOG_LEVEL _output_level;
+        private StreamWriter _stream;
 
         /// <summary>
-        /// ログ出力オブジェクトの設定
+        /// ログ出力オブジェクトの作成
         /// </summary>
-        /// <param name="file_name"></param>
-        /// <param name="file_encode"></param>
-        /// <param name="log_category"></param>
+        /// <param name="file_name">出力ファイル名</param>
+        /// <param name="output_dir">出力先ディレクトリ</param>
+        /// <param name="file_encode">出力エンコード</param>
         /// <param name="debug_flg"></param>
-        public static void loger_setup(string file_name, string output_dir, string file_encode, string log_category="info", bool debug_flg=false)
+        public static loger_module create_loger(string file_name, string output_dir, string file_encode, E_LOG_LEVEL log_level, bool debug_flg = false)
         {
-            System.IO.StreamWriter st_write_obj;
             try
             {
-                if (_stream_list == null) _stream_list = new Dictionary<string, StreamWriter>();
-                if (_stream_list.ContainsKey(log_category)) return; // 既に登録済みログ種別であれば後の処理は行わない
                 string log_file_name = "";
                 string log_dir = path_extracted(file_name); // ディレクト情報の抽出
                 if (log_dir == "") // パス情報が無ければ、固定値にする
@@ -36,73 +41,15 @@ namespace tool_commons.modules
                     log_file_name = create_log_filename(file_name, debug_flg);
 
                 if (!Directory.Exists(log_dir)) Directory.CreateDirectory(log_dir); // ディレクトが無ければ作成
+                if (File.Exists(log_file_name)) return null;
 
-                st_write_obj = new StreamWriter(log_file_name, true, Encoding.GetEncoding(file_encode));
-                _stream_list.Add(log_category, st_write_obj);
+                return new loger_module(log_file_name, file_encode, log_level);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                st_write_obj = null;
+                return null;
             }
-        }
-
-        /// <summary>
-        /// オブジェクトの後始末
-        /// </summary>
-        public static void close()
-        {
-            if (_stream_list == null) return;
-            foreach (var stream_obj in _stream_list) {
-                stream_obj.Value.Dispose();
-                stream_obj.Value.Close();
-            }
-        }
-
-        /// <summary>
-        /// ログ出力
-        /// </summary>
-        /// <param name="str">出力文字列</param>
-        /// <param name="log_category">ログ種別</param>
-        /// <param name="replace_category">差し替えログ種別</param>
-        public static void write_log(string str="", string log_category = "info", string replace_category="")
-        {
-            // ログ出力 ラムダ関数
-            Func<System.IO.StreamWriter, string, bool> write_log = (StreamWriter st_write, string category) => {
-                try
-                {
-                    if (str == "") return true;
-
-                    DateTime dt_obj = DateTime.Now;
-                    string write_str = dt_obj.ToString("HH:mm:ss.fff\t");
-                    write_str += (!category.Equals("")) ? $"[{category}]" + ":\t" : "";
-                    write_str += str;
-
-                    st_write.Write(write_str);
-                    st_write.Flush();
-                    st_write.WriteLine();
-
-                    return true;
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.Message);
-                    return false;
-                }
-            };
-
-            if ((_stream_list == null) || (_stream_list.Count == 0))
-            {
-                Console.WriteLine(str); // ログ出力オブジェクトがない場合はコンソールに表示
-                return;
-            }
-
-            string write_category = replace_category.Equals("") ? log_category : replace_category;
-            if (_stream_list.ContainsKey(write_category))
-                write_log(_stream_list[write_category], write_category);  // 該当するファイルのストリームがある場合
-            else
-                write_log(_stream_list.First().Value, write_category); // 該当するファイルのストリームがない場合
-
         }
 
         /// <summary>
@@ -153,6 +100,103 @@ namespace tool_commons.modules
             if (cat_point == -1) return "";
 
             return st_path.Substring(0, cat_point);
+        }
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="file_name">ログファイル名</param>
+        /// <param name="file_encode">エンコード</param>
+        /// <param name="log_level">出力ログレベル</param>
+        loger_module(string file_name, string file_encode, E_LOG_LEVEL log_level)
+        {
+            _output_level = log_level;
+            _stream = new StreamWriter(file_name, true, Encoding.GetEncoding(file_encode));
+        }
+
+        /// <summary>
+        /// オブジェクトの後始末
+        /// </summary>
+        public void close()
+        {
+            if (_stream == null) return;
+
+            _stream.Close();
+            _stream = null;
+        }
+
+        /// <summary>
+        /// ログ出力
+        /// </summary>
+        /// <param name="str">出力文字列</param>
+        /// <param name="log_category">ログ種別</param>
+        /// <param name="replace_category">差し替えログ種別</param>
+        private void write_log(string str, string log_category)
+        {
+            if (str == "") return;
+            if (_stream.Equals(null))
+            {
+                Console.WriteLine(str); // ログ出力オブジェクトがない場合はコンソールに表示
+                return;
+            }
+
+            try
+            {
+                DateTime dt_obj = DateTime.Now;
+                string write_str = dt_obj.ToString("HH:mm:ss.fff\t");
+                write_str += (!log_category.Equals("")) ? $"[{log_category}]" + ":\t" : "";
+                write_str += str;
+
+                _stream.Write(write_str);
+                _stream.Flush();
+                _stream.WriteLine();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
+
+        /// <summary>
+        /// エラーログ出力関数
+        /// </summary>
+        /// <param name="str">出力文字列</param>
+        public void write_log_error(string str)
+        {
+            if ((_output_level & E_LOG_LEVEL.E_ERROR) == 0) return;
+            write_log(str, "ERROR");
+        }
+
+        /// <summary>
+        /// 警告ログ出力関数
+        /// </summary>
+        /// <param name="str">出力文字列</param>
+        public void write_log_warning(string str)
+        {
+            if ((_output_level & E_LOG_LEVEL.E_WARNING) == 0) return;
+            write_log(str, "WARNING");
+        }
+
+        /// <summary>
+        /// インフォーメーションログ出力関数
+        /// </summary>
+        /// <param name="str">出力文字列</param>
+        public void write_log_info(string str)
+        {
+            if ((_output_level & E_LOG_LEVEL.E_INFO) == 0) return;
+            write_log(str, "INFO");
+        }
+
+        /// <summary>
+        /// ユーザー定義のログ出力関数
+        /// </summary>
+        /// <param name="str">出力文字列</param>
+        /// <param name="category">出力カテゴリ</param>
+        public void write_log_userlog(string str, string category)
+        {
+            if ((_output_level & E_LOG_LEVEL.E_USER_LOG) == 0) return;
+            string str_category = category.ToUpper();
+            write_log(str, str_category);
         }
     }
 }

@@ -18,6 +18,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)modules\csv_converter_module.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)modules\excel_converter_module.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)modules\json_module.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)modules\loger_manager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)modules\loger_module.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)modules\mysql_module.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)modules\utility_tools.cs" />

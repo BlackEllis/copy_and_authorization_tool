@@ -55,7 +55,7 @@ namespace comparison_front_creating_tool
                 export_serialize(compari_table, export_dir, json_module.get_external_resource("export_xml_filename", constant.EXPORT_XML_FILENAME));
                 Console.WriteLine("Export AD User to Serialize : End");
 
-                loger_module.close();
+                loger_manager.close();
             }
             catch (Exception e)
             {
@@ -84,12 +84,13 @@ namespace comparison_front_creating_tool
             error_file = utility_tools.get_value_from_hasharray(args, constant.RESOURCES_KEY_ERRORLOG, error_file);
             string error_encode = json_module.get_external_resource("error_file_encode", constant.ERROR_FILE_ENCODE);
 
+            loger_manager.setup_manager();
 #if DEBUG
-            loger_module.loger_setup(log_file, log_dir, log_encode, "info", true);
-            loger_module.loger_setup(error_file, log_dir, error_encode, "error", true);
+            loger_manager.add_stream("info", log_file, log_dir, log_encode, loger_module.E_LOG_LEVEL.E_ALL, true);
+            loger_manager.add_stream("extracting", extracting_file, log_dir, extracting_encode, loger_module.E_LOG_LEVEL.E_ALL, true);
 #else
-            loger_module.loger_setup(log_file, log_dir, log_encode, "info");
-            loger_module.loger_setup(error_file, log_dir, error_encode, "error");
+            loger_manager.add_stream("info", log_file, log_dir, log_encode, loger_module.E_LOG_LEVEL.E_ERROR | loger_module.E_LOG_LEVEL.E_WARNING);
+            loger_manager.add_stream("error", error_file, log_dir, error_encode, loger_module.E_LOG_LEVEL.E_ALL);
 #endif
         }
 
@@ -138,7 +139,7 @@ namespace comparison_front_creating_tool
             }
             catch (Exception e)
             {
-                loger_module.write_log(e.Message, "error", "info");
+                loger_manager.write_log(e.Message, "error");
                 return null;
             }
         }
@@ -160,7 +161,7 @@ namespace comparison_front_creating_tool
             }
             catch (Exception e)
             {
-                loger_module.write_log(e.Message, "error", "info");
+                loger_manager.write_log(e.Message, "error");
                 return null;
             }
         }
@@ -194,7 +195,7 @@ namespace comparison_front_creating_tool
 
             if ((group_infos == null) || (group_infos.Count == 0))
             {
-                loger_module.write_log("ADからの取得グループ情報がありません", "error", "info");
+                loger_manager.write_log("ADからの取得グループ情報がありません", "error");
                 return null;
             }
 
@@ -227,13 +228,13 @@ namespace comparison_front_creating_tool
                         }
                         catch (Exception e)
                         {
-                            loger_module.write_log(e.Message, "error");
+                            loger_manager.write_log(e.Message, "error");
                         }
                     }
                 }
                 else
                 {
-                    loger_module.write_log($"該当するグループ名がありません グループ名: {ad_group_membars.Key}", "error", "info");
+                    loger_manager.write_log($"該当するグループ名がありません グループ名: {ad_group_membars.Key}", "error");
                 }
 
                 if (ad_group_membars.Value.group_members.Count == 0) continue;
@@ -252,7 +253,7 @@ namespace comparison_front_creating_tool
                     }
                     catch (Exception e)
                     {
-                            loger_module.write_log(e.Message, "error", "info");
+                            loger_manager.write_log(e.Message, "error");
                     }
                 }
             }
@@ -289,7 +290,7 @@ namespace comparison_front_creating_tool
             }
             catch (Exception e)
             {
-                loger_module.write_log(e.Message, "error", "info");
+                loger_manager.write_log(e.Message, "error");
             }
 
         }

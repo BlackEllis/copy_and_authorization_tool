@@ -38,7 +38,7 @@ namespace tool_commons
             catch (Exception e)
             {
                 // ファイルを開くのに失敗したとき
-                loger_module.write_log(e.Message, "error", "info");
+                loger_manager.write_log(e.Message, "error");
             }
 
             return dst_list;
@@ -102,7 +102,7 @@ namespace tool_commons
             }
             catch (Exception e)
             {
-                loger_module.write_log(e.Message, "error", "info");
+                loger_manager.write_log(e.Message, "error");
                 return false;
             }
 

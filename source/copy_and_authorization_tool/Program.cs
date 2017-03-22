@@ -88,11 +88,11 @@ namespace copy_and_authorization_tool
             }
             catch (Exception e)
             {
-                loger_module.write_log(e.Message, "error", "info");
+                 loger_manager.write_log(e.Message, "error");
                 Console.WriteLine(e.Message);
             }
 
-            loger_module.close();
+            loger_manager.close();
             Console.WriteLine("press any key to exit.");
             Console.ReadKey();
         }
@@ -114,12 +114,13 @@ namespace copy_and_authorization_tool
             extracting_file = utility_tools.get_value_from_hasharray(args, constant.RESOURCES_KEY_EXTRACTINGLOG, extracting_file);
             string extracting_encode = json_module.get_external_resource("extracting_file_encode", constant.EXTRACTING_FILE_ENCODE);
 
+            loger_manager.setup_manager();
 #if DEBUG
-            loger_module.loger_setup(log_file, log_dir, log_encode, "info", true);
-            loger_module.loger_setup(extracting_file, log_dir, extracting_encode, "extracting", true);
+            loger_manager.add_stream("info", log_file, log_dir, log_encode, loger_module.E_LOG_LEVEL.E_ALL, true);
+            loger_manager.add_stream("extracting", extracting_file, log_dir, extracting_encode, loger_module.E_LOG_LEVEL.E_ALL, true);
 #else
-            loger_module.loger_setup(log_file, log_dir, log_encode, "info");
-            loger_module.loger_setup(extracting_file, log_dir, extracting_encode, "extracting");
+            loger_manager.add_stream("info", log_file, log_dir, log_encode, loger_module.E_LOG_LEVEL.E_ERROR | loger_module.E_LOG_LEVEL.E_WARNING);
+            loger_manager.add_stream("extracting", extracting_file, log_dir, extracting_encode, loger_module.E_LOG_LEVEL.E_ALL);
 #endif
         }
 
@@ -142,7 +143,7 @@ namespace copy_and_authorization_tool
             }
             catch (Exception e)
             {
-                loger_module.write_log(e.Message, "error", "info");
+                loger_manager.write_log(e.Message, "error");
                 return null;
             }
         }
@@ -179,9 +180,9 @@ namespace copy_and_authorization_tool
                 p.StartInfo.RedirectStandardOutput = true;
                 p.StartInfo.RedirectStandardError = true;
                 p.Start();
-                loger_module.write_log(p.StartInfo.Arguments);
-                loger_module.write_log(p.StandardOutput.ReadToEnd());
-                loger_module.write_log(p.StandardError.ReadToEnd(), "error", "info");
+                loger_manager.write_log(p.StartInfo.Arguments);
+                loger_manager.write_log(p.StandardOutput.ReadToEnd());
+                loger_manager.write_log(p.StandardError.ReadToEnd(), "error");
                 p.WaitForExit();
             }
         }
@@ -222,15 +223,15 @@ namespace copy_and_authorization_tool
                     p.StartInfo.RedirectStandardOutput = true;
                     p.StartInfo.RedirectStandardError = true;
                     p.Start();
-                    loger_module.write_log(p.StartInfo.Arguments);
-                    loger_module.write_log(p.StandardOutput.ReadToEnd());
-                    loger_module.write_log(p.StandardError.ReadToEnd(), "error", "info");
+                    loger_manager.write_log(p.StartInfo.Arguments);
+                    loger_manager.write_log(p.StandardOutput.ReadToEnd());
+                    loger_manager.write_log(p.StandardError.ReadToEnd(), "error");
                     p.WaitForExit();
                 }
             }
             catch (Exception e)
             {
-                loger_module.write_log(e.Message, "error", "info");
+                 loger_manager.write_log(e.Message, "error");
             }
         }
 
@@ -255,7 +256,7 @@ namespace copy_and_authorization_tool
                 {
                     if (!foldername.Equals(exception_foldername)) continue;
 
-                    loger_module.write_log($"例外対象: {src_dir_info.FullName}", "exception", "info");
+                    loger_manager.write_log($"例外対象: {src_dir_info.FullName}", "exception");
                     return true;
                 }
 
@@ -273,7 +274,7 @@ namespace copy_and_authorization_tool
                         if (!dst_file.Name.Equals(src_file.Name)) continue;
 
                         if(!file_authority_replacement(src_file, dst_file, ref comparison_list))
-                            loger_module.write_log($"該当ファイルがコピーされていないか、アクセス権がありません。：{src_file.FullName}", "extracting");
+                            loger_manager.write_log($"該当ファイルがコピーされていないか、アクセス権がありません。：{src_file.FullName}", "error", "extracting");
                         break;
                     }
                 }
@@ -295,7 +296,7 @@ namespace copy_and_authorization_tool
             }
             catch (Exception e)
             {
-                loger_module.write_log(e.Message, "error", "info");
+                 loger_manager.write_log(e.Message, "error");
                 return false;
             }
         }
@@ -321,15 +322,15 @@ namespace copy_and_authorization_tool
                     if (comparison_list.ContainsKey(account_name))
                     {
 
-                        loger_module.write_log($"適応先： {dst_dir.FullName} " + ((src_rules.InheritanceFlags & InheritanceFlags.ContainerInherit) > 0 ? "このフォルダとサブフォルダ" : "このフォルダのみ"), "conversion", "info");
+                        loger_manager.write_log($"適応先： {dst_dir.FullName} " + ((src_rules.InheritanceFlags & InheritanceFlags.ContainerInherit) > 0 ? "このフォルダとサブフォルダ" : "このフォルダのみ"), "conversion");
                         comparsion_unit unit = comparison_list[account_name];
                         if (unit.del_flg == 1)
                         {
-                            loger_module.write_log($"削除対象アカウント： {unit.account_name} {unit.conversion_original} | {src_rules.FileSystemRights.ToString()}", "conversion", "info");
+                            loger_manager.write_log($"削除対象アカウント： {unit.account_name} {unit.conversion_original} | {src_rules.FileSystemRights.ToString()}", "conversion");
                             continue; // del_flgが1のものは権限設定処理を行わない
                         }
 
-                        loger_module.write_log($"変換対象アカウント： {unit.account_name} {unit.conversion_original} → {unit.after_conversion} | {src_rules.FileSystemRights.ToString()}", "conversion", "info");
+                        loger_manager.write_log($"変換対象アカウント： {unit.account_name} {unit.conversion_original} → {unit.after_conversion} | {src_rules.FileSystemRights.ToString()}", "conversion");
                         dst_dir_security.AddAccessRule(new FileSystemAccessRule(unit.after_conversion,
                                                                                 src_rules.FileSystemRights,
                                                                                 src_rules.InheritanceFlags,
@@ -338,8 +339,8 @@ namespace copy_and_authorization_tool
                     }
                     else
                     {
-                        loger_module.write_log($"適応先： {dst_dir.FullName} " + ((src_rules.InheritanceFlags & InheritanceFlags.ContainerInherit) > 0 ? "このフォルダとサブフォルダ" : "このフォルダのみ"), "extracting");
-                        loger_module.write_log($"変換対象外アカウント：{account_name} | {src_rules.FileSystemRights.ToString()}", "extracting");
+                        loger_manager.write_log($"適応先： {dst_dir.FullName} " + ((src_rules.InheritanceFlags & InheritanceFlags.ContainerInherit) > 0 ? "このフォルダとサブフォルダ" : "このフォルダのみ"), "extracting", "extracting");
+                        loger_manager.write_log($"変換対象外アカウント：{account_name} | {src_rules.FileSystemRights.ToString()}", "extracting", "extracting");
                         dst_dir_security.AddAccessRule(src_rules);
                     }
                 }
@@ -352,7 +353,7 @@ namespace copy_and_authorization_tool
             }
             catch (Exception e)
             {
-                loger_module.write_log($"{e.GetType()} {e.Message}", "error", "info");
+                loger_manager.write_log($"{e.GetType()} {e.Message}", "error", "info");
                 return false;
             }
 
@@ -375,19 +376,19 @@ namespace copy_and_authorization_tool
                 {
                     int cat_pint = src_rules.IdentityReference.ToString().LastIndexOf('\\') + 1;
                     string account_name = src_rules.IdentityReference.ToString().Substring(cat_pint);
-                    loger_module.write_log($"{account_name}");
+                    loger_manager.write_log($"{account_name}");
                     if (comparison_list.ContainsKey(account_name))
                     {
-                        loger_module.write_log($"適応先： {dst_file.FullName} " + ((src_rules.InheritanceFlags & InheritanceFlags.ContainerInherit) > 0 ? "このフォルダとサブフォルダ" : "このフォルダのみ"), "conversion", "info");
+                        loger_manager.write_log($"適応先： {dst_file.FullName} " + ((src_rules.InheritanceFlags & InheritanceFlags.ContainerInherit) > 0 ? "このフォルダとサブフォルダ" : "このフォルダのみ"), "conversion");
                         
                         comparsion_unit unit = comparison_list[account_name];
                         if (unit.del_flg == 1)
                         {
-                            loger_module.write_log($"削除対象アカウント： {unit.account_name} {unit.conversion_original} | {src_rules.FileSystemRights.ToString()}", "conversion", "info");
+                            loger_manager.write_log($"削除対象アカウント： {unit.account_name} {unit.conversion_original} | {src_rules.FileSystemRights.ToString()}", "conversion");
                             continue; // del_flgが1のものは権限設定処理を行わない
                         }
 
-                        loger_module.write_log($"変換対象アカウント： {unit.account_name} {unit.conversion_original} → {unit.after_conversion} | {src_rules.FileSystemRights.ToString()}", "conversion", "info");
+                        loger_manager.write_log($"変換対象アカウント： {unit.account_name} {unit.conversion_original} → {unit.after_conversion} | {src_rules.FileSystemRights.ToString()}", "conversion");
                         dst_file_security.AddAccessRule(new FileSystemAccessRule(unit.after_conversion,
                                                                                     src_rules.FileSystemRights,
                                                                                     src_rules.InheritanceFlags,
@@ -396,8 +397,8 @@ namespace copy_and_authorization_tool
                     }
                     else
                     {
-                        loger_module.write_log($"適応先： {dst_file.FullName} " + ((src_rules.InheritanceFlags & InheritanceFlags.ContainerInherit) > 0 ? "このフォルダとサブフォルダ" : "このフォルダのみ"), "extracting");
-                        loger_module.write_log($"変換対象外アカウント：{account_name} | {src_rules.FileSystemRights.ToString()}", "extracting");
+                        loger_manager.write_log($"適応先： {dst_file.FullName} " + ((src_rules.InheritanceFlags & InheritanceFlags.ContainerInherit) > 0 ? "このフォルダとサブフォルダ" : "このフォルダのみ"), "extracting");
+                        loger_manager.write_log($"変換対象外アカウント：{account_name} | {src_rules.FileSystemRights.ToString()}", "extracting");
                         dst_file_security.AddAccessRule(src_rules); // 変換対象が無ければ、移管元の権限そのまま移管
                     }
                 }
@@ -410,7 +411,7 @@ namespace copy_and_authorization_tool
             }
             catch (Exception e)
             {
-                loger_module.write_log(e.Message, "error", "info");
+                 loger_manager.write_log(e.Message, "error");
                 return false;
             }
         }
@@ -434,24 +435,24 @@ namespace copy_and_authorization_tool
 
             if (src_dir.Equals("") || dst_dir.Equals(""))
             {
-                loger_module.write_log($"比較対象設定が不適切\t \t\tsrc_dir:{src_dir}\n\t\tdst_dir:{dst_dir}");
+                loger_manager.write_log($"比較対象設定が不適切\t \t\tsrc_dir:{src_dir}\n\t\tdst_dir:{dst_dir}");
                 return;
             }
 
             DirectorySecurity src_dir_security = Directory.GetAccessControl(src_dir);
             DirectorySecurity dst_dir_security = Directory.GetAccessControl(dst_dir);
 
-            loger_module.write_log("AccessControlType\tAccountName\tFileSystemRights\tIsInherited"
+            loger_manager.write_log("AccessControlType\tAccountName\tFileSystemRights\tIsInherited"
 + "\tInheritanceFlags\tPropagationFlags");
             AuthorizationRuleCollection src_rules = src_dir_security.GetAccessRules(true, true, typeof(NTAccount));
             for (int i = 0; i < src_rules.Count; i++)
-                loger_module.write_log(security_output((FileSystemAccessRule)src_rules[i]));
+                loger_manager.write_log(security_output((FileSystemAccessRule)src_rules[i]));
 
-            loger_module.write_log("AccessControlType\tAccountName\tFileSystemRights\tIsInherited"
+            loger_manager.write_log("AccessControlType\tAccountName\tFileSystemRights\tIsInherited"
 + "\tInheritanceFlags\tPropagationFlags");
             AuthorizationRuleCollection dst_rules = dst_dir_security.GetAccessRules(true, true, typeof(NTAccount));
             for (int i = 0; i < dst_rules.Count; i++)
-                loger_module.write_log(security_output((FileSystemAccessRule)dst_rules[i]));
+                loger_manager.write_log(security_output((FileSystemAccessRule)dst_rules[i]));
         }
 
     }
