@@ -55,7 +55,7 @@ namespace tool_commons.model
             }
             catch (Exception e)
             {
-                loger_module.write_log(e.Message, "error", "info");
+                loger_manager.write_log(e.Message, "error");
             }
         }
 
@@ -78,7 +78,7 @@ namespace tool_commons.model
             }
             catch (Exception e)
             {
-                loger_module.write_log(e.Message, "error", "info");
+                loger_manager.write_log(e.Message, "error");
             }
         }
 
@@ -90,7 +90,7 @@ namespace tool_commons.model
         {
             Func<string, bool> write_log = (string str) =>
             {
-                loger_module.write_log(str, "debug", "info");
+                loger_manager.write_log(str, "debug");
                 return true;
             };
 
@@ -147,7 +147,7 @@ namespace tool_commons.model
             }
             catch (Exception e)
             {
-                loger_module.write_log(e.Message, "error", "info");
+                loger_manager.write_log(e.Message, "error");
                 return null;
             }
         }

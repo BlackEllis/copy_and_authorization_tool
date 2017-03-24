@@ -11,8 +11,9 @@ namespace tool_commons.modules
             E_ALL = 0xff,
             E_ERROR = 0x01,
             E_WARNING = 0x02,
-            E_INFO = 0x04,
-            E_USER_LOG = 0x08,
+            E_DEBUG = 0x04,
+            E_INFO = 0x08,
+            E_USER_LOG = 0x10,
         };
 
         private E_LOG_LEVEL _output_level;
@@ -175,6 +176,12 @@ namespace tool_commons.modules
         {
             if ((_output_level & E_LOG_LEVEL.E_WARNING) == 0) return;
             write_log(str, "WARNING");
+        }
+
+        public void write_log_debug(string str)
+        {
+            if ((_output_level & E_LOG_LEVEL.E_DEBUG) == 0) return;
+            write_log(str, "DEBUG");
         }
 
         /// <summary>

@@ -49,6 +49,9 @@ namespace tool_commons.modules
                 case "WARNING":
                     write_loger.write_log_warning(str);
                     break;
+                case "DEBUG":
+                    write_loger.write_log_debug(str);
+                    break;
                 case "INFO":
                     write_loger.write_log_info(str);
                     break;
