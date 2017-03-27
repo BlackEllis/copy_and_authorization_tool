@@ -87,7 +87,7 @@ namespace comparison_front_creating_tool
             loger_manager.setup_manager();
 #if DEBUG
             loger_manager.add_stream("info", log_file, log_dir, log_encode, loger_module.E_LOG_LEVEL.E_ALL, true);
-            loger_manager.add_stream("extracting", extracting_file, log_dir, extracting_encode, loger_module.E_LOG_LEVEL.E_ALL, true);
+            loger_manager.add_stream("extracting", error_file, log_dir, error_encode, loger_module.E_LOG_LEVEL.E_ALL, true);
 #else
             loger_manager.add_stream("info", log_file, log_dir, log_encode, loger_module.E_LOG_LEVEL.E_ERROR | loger_module.E_LOG_LEVEL.E_WARNING);
             loger_manager.add_stream("error", error_file, log_dir, error_encode, loger_module.E_LOG_LEVEL.E_ALL);
