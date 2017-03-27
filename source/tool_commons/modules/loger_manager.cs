@@ -8,11 +8,11 @@ namespace tool_commons.modules
 {
     class loger_manager
     {
-        private static Dictionary<string, loger_module> _stream_list = default(Dictionary<string, loger_module>);
+        private static Dictionary<string, loger_module> _stream_list = null;
 
         public static void setup_manager()
         {
-            if (!_stream_list.Equals(default(Dictionary<string, loger_module>))) return;
+            if (_stream_list != null) return;
 
             _stream_list = new Dictionary<string, loger_module>();
         }
@@ -20,8 +20,8 @@ namespace tool_commons.modules
         public static void add_stream(string stream_name, string file_name, string output_dir, string file_encode, loger_module.E_LOG_LEVEL log_level, bool debug_flg = false)
         {
             loger_module obj = loger_module.create_loger(file_name, output_dir, file_encode, log_level, debug_flg);
-            if (obj.Equals(null)) return;
-            if (_stream_list.Equals(default(Dictionary<string, loger_module>))) return;
+            if (obj == null) return;
+            if (_stream_list == null) return;
             if (_stream_list.ContainsKey(stream_name)) return;
 
             _stream_list.Add(stream_name, obj);
@@ -30,7 +30,7 @@ namespace tool_commons.modules
         public static void write_log(string str, string category="INFO", string stream_name = "info")
         {
             string str_category = category.ToUpper();
-            if (_stream_list.Equals(default(Dictionary<string, loger_module>)) || (_stream_list.Count == 0))
+            if ((_stream_list == null) || (_stream_list.Count == 0))
             {
                 System.Console.WriteLine($"{str_category}\t{str}");
                 return;
