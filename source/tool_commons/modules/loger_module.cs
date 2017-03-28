@@ -6,7 +6,7 @@ namespace tool_commons.modules
 {
     class loger_module
     {
-        public enum E_LOG_LEVEL
+        public enum E_LOG_LEVEL : int
         {
             E_ALL = 0xff,
             E_ERROR = 0x01,
