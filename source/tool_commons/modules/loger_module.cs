@@ -42,7 +42,6 @@ namespace tool_commons.modules
                     log_file_name = create_log_filename(file_name, debug_flg);
 
                 if (!Directory.Exists(log_dir)) Directory.CreateDirectory(log_dir); // ディレクトが無ければ作成
-                if (File.Exists(log_file_name)) return null;
 
                 return new loger_module(log_file_name, file_encode, log_level);
             }

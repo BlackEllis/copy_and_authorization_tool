@@ -116,7 +116,7 @@ namespace copy_and_authorization_tool
             string extracting_file = json_module.get_external_resource("default_extracting_filename", constant.DEFAULT_EXTRACTING_FILENAME);
             extracting_file = utility_tools.get_value_from_hasharray(args, constant.RESOURCES_KEY_EXTRACTINGLOG, extracting_file);
             string extracting_encode = json_module.get_external_resource("extracting_file_encode", constant.EXTRACTING_FILE_ENCODE);
-            string wk_extracting_output_level = json_module.get_external_resource("default_log_output_level", loger_module.E_LOG_LEVEL.E_ALL.ToString());
+            string wk_extracting_output_level = json_module.get_external_resource("default_extracting_output_level", loger_module.E_LOG_LEVEL.E_ALL.ToString());
             wk_extracting_output_level = utility_tools.get_value_from_hasharray(args, constant.RESOURCES_KEY_LOGLEVEL, wk_extracting_output_level);
             loger_module.E_LOG_LEVEL extracting_output_level = (loger_module.E_LOG_LEVEL)Enum.Parse(typeof(loger_module.E_LOG_LEVEL), wk_extracting_output_level);
 
