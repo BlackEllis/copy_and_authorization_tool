@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
-using System.Linq;
 using System.Text;
 using tool_commons.model;
 using tool_commons.modules;
@@ -43,7 +42,7 @@ namespace comparison_front_creating_tool
                 if (data_table != null)
                 {
                     Console.WriteLine("storing AD User Infos : start");
-                   compari_table = create_comparison_data(data_table);
+                    compari_table = create_comparison_data(data_table);
                     Console.WriteLine("storing AD User Infos : End");
                 }
 
@@ -59,8 +58,7 @@ namespace comparison_front_creating_tool
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
-
+                loger_manager.write_log(e.Message, "error");
             }
             Console.WriteLine("press any key to exit.");
             Console.ReadKey();
@@ -79,18 +77,18 @@ namespace comparison_front_creating_tool
             log_file = utility_tools.get_value_from_hasharray(args, constant.RESOURCES_KEY_LOG, log_file);
             string log_encode = json_module.get_external_resource("log_file_encode", constant.LOG_FILE_ENCODE);
 
-            // エラーファイルの関係設定
-            string error_file = json_module.get_external_resource("default_error_filename", constant.DEFAULT_ERROR_FILENAME);
-            error_file = utility_tools.get_value_from_hasharray(args, constant.RESOURCES_KEY_ERRORLOG, error_file);
-            string error_encode = json_module.get_external_resource("error_file_encode", constant.ERROR_FILE_ENCODE);
+            // 抽出ログファイルの関係設定
+            string extracting_file = json_module.get_external_resource("default_extracting_filename", constant.DEFAULT_EXTRACTING_FILENAME);
+            extracting_file = utility_tools.get_value_from_hasharray(args, constant.RESOURCES_KEY_EXTRACTINGLOG, extracting_file);
+            string extracting_encode = json_module.get_external_resource("error_file_encode", constant.EXTRACTING_FILE_ENCODE);
 
             loger_manager.setup_manager();
 #if DEBUG
             loger_manager.add_stream("info", log_file, log_dir, log_encode, loger_module.E_LOG_LEVEL.E_ALL, true);
-            loger_manager.add_stream("extracting", error_file, log_dir, error_encode, loger_module.E_LOG_LEVEL.E_ALL, true);
+            loger_manager.add_stream("extracting", extracting_file, log_dir, extracting_encode, loger_module.E_LOG_LEVEL.E_ALL, true);
 #else
             loger_manager.add_stream("info", log_file, log_dir, log_encode, loger_module.E_LOG_LEVEL.E_ERROR | loger_module.E_LOG_LEVEL.E_WARNING);
-            loger_manager.add_stream("error", error_file, log_dir, error_encode, loger_module.E_LOG_LEVEL.E_ALL);
+            loger_manager.add_stream("error", extracting_file, log_dir, extracting_encode, loger_module.E_LOG_LEVEL.E_ALL);
 #endif
         }
 
@@ -195,7 +193,7 @@ namespace comparison_front_creating_tool
 
             if ((group_infos == null) || (group_infos.Count == 0))
             {
-                loger_manager.write_log("ADからの取得グループ情報がありません", "error");
+                loger_manager.write_log("ADからの取得グループ情報がありません", "warning");
                 return null;
             }
 
@@ -234,7 +232,7 @@ namespace comparison_front_creating_tool
                 }
                 else
                 {
-                    loger_manager.write_log($"該当するグループ名がありません グループ名: {ad_group_membars.Key}", "error");
+                    loger_manager.write_log($"該当するグループ名がありません グループ名: {ad_group_membars.Key}", "extracting", "extracting");
                 }
 
                 if (ad_group_membars.Value.group_members.Count == 0) continue;
