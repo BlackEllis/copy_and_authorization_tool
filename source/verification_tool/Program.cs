@@ -101,19 +101,25 @@ namespace verification_tool
             string log_file = json_module.get_external_resource("default_log_filename", constant.DEFAULT_LOG_FILENAME);
             log_file = utility_tools.get_value_from_hasharray(args, constant.RESOURCES_KEY_LOG, log_file);
             string log_encode = json_module.get_external_resource("log_file_encode", constant.LOG_FILE_ENCODE);
+            string wk_log_output_level = json_module.get_external_resource("default_log_output_level", (loger_module.E_LOG_LEVEL.E_ERROR | loger_module.E_LOG_LEVEL.E_WARNING).ToString());
+            wk_log_output_level = utility_tools.get_value_from_hasharray(args, constant.RESOURCES_KEY_LOGLEVEL, wk_log_output_level);
+            loger_module.E_LOG_LEVEL log_output_level = (loger_module.E_LOG_LEVEL)Enum.Parse(typeof(loger_module.E_LOG_LEVEL), wk_log_output_level);
 
             // 抽出ログファイルの関係設定
             string extracting_file = json_module.get_external_resource("default_extracting_filename", constant.DEFAULT_EXTRACTING_FILENAME);
             extracting_file = utility_tools.get_value_from_hasharray(args, constant.RESOURCES_KEY_EXTRACTINGLOG, extracting_file);
             string extracting_encode = json_module.get_external_resource("extracting_file_encode", constant.EXTRACTING_FILE_ENCODE);
+            string wk_extracting_output_level = json_module.get_external_resource("default_log_output_level", loger_module.E_LOG_LEVEL.E_ALL.ToString());
+            wk_extracting_output_level = utility_tools.get_value_from_hasharray(args, constant.RESOURCES_KEY_LOGLEVEL, wk_extracting_output_level);
+            loger_module.E_LOG_LEVEL extracting_output_level = (loger_module.E_LOG_LEVEL)Enum.Parse(typeof(loger_module.E_LOG_LEVEL), wk_extracting_output_level);
 
             loger_manager.setup_manager();
 #if DEBUG
-            loger_manager.add_stream("info", log_file, log_dir, log_encode, loger_module.E_LOG_LEVEL.E_ALL, true);
-            loger_manager.add_stream("extracting", extracting_file, log_dir, extracting_encode, loger_module.E_LOG_LEVEL.E_ALL, true);
+            loger_manager.add_stream("info", log_file, log_dir, log_encode, log_output_level, true);
+            loger_manager.add_stream("extracting", extracting_file, log_dir, extracting_encode, extracting_output_level, true);
 #else
-            loger_manager.add_stream("info", log_file, log_dir, log_encode, loger_module.E_LOG_LEVEL.E_ERROR | loger_module.E_LOG_LEVEL.E_WARNING);
-            loger_manager.add_stream("extracting", extracting_file, log_dir, extracting_encode, loger_module.E_LOG_LEVEL.E_ALL);
+            loger_manager.add_stream("info", log_file, log_dir, log_encode, log_output_level);
+            loger_manager.add_stream("extracting", extracting_file, log_dir, extracting_encode, extracting_output_level);
 #endif
         }
 

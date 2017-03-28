@@ -9,9 +9,11 @@ namespace verification_tool
     class constant
     {
         // 引数でのキーワード
-        public const string RESOURCES_KEY_EXTERNAL = "EXTERNAL_FILE";           // 外部設定ファイル参照フォルダ設定オプション
-        public const string RESOURCES_KEY_LOG = "LOG_FILE";                     // システムログ出力先設定オプション
-        public const string RESOURCES_KEY_EXTRACTINGLOG = "EXTRACTING_FILE";    // 抽出ログ出力先設定オプション
+        public const string RESOURCES_KEY_EXTERNAL = "EXTERNAL_FILE";               // 外部設定ファイル参照フォルダ設定オプション
+        public const string RESOURCES_KEY_LOG = "LOG_FILE";                         // システムログ出力先設定オプション
+        public const string RESOURCES_KEY_LOGLEVEL = "LOG_LEVEL";                   // システムログの出力レベル
+        public const string RESOURCES_KEY_EXTRACTINGLOG = "EXTRACTING_FILE";        // 抽出ログ出力先設定オプション
+        public const string RESOURCES_KEY_EXTRACTINGLOGLEVEL = "EXTRACTING_LEVEL";  // 抽出ログの出力レベル
 
         // デフォルトの外部設定ファイルの情報
         public const string EXTERNAL_RESOURCE_ENCODE = "utf-8";                     // 文字コード
