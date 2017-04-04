@@ -142,8 +142,6 @@ namespace tool_commons.model
 
                     return dst_list;
                 }
-
-
             }
             catch (Exception e)
             {
@@ -151,6 +149,52 @@ namespace tool_commons.model
                 return null;
             }
         }
+
+        /// <summary>
+        /// 引数で指定したDBにユーザー情報を書き込む
+        /// </summary>
+        /// <param name="connection_sql">接続先DB情報文字列</param>
+        /// <returns></returns>
+        public bool insert_user_info(string connection_sql)
+        {
+            using (MySqlConnection mysql_cone = new MySqlConnection(connection_sql))
+            using (MySqlCommand mysql_commnd = mysql_cone.CreateCommand())
+            {
+                mysql_cone.Open();
+                MySqlTransaction transaction = mysql_cone.BeginTransaction(System.Data.IsolationLevel.ReadCommitted);
+
+                try
+                {
+                    mysql_commnd.CommandText = @"INSERT INTO user_info
+                                            (account_name, first_name, last_name, mail_address, affiliation, job_title, s_id, del_flg)
+                                        VALUES (@ACCOUNT_NAME, @FIRST_NAME, @LAST_NAME, @MAIL_ADDRESS, @AFFILIATION, @JOB_TITLE, @S_ID, @DEL_FLG)
+                                        ON DUPLICATE KEY UPDATE
+                                            account_name = @ACCOUNT_NAME, first_name = @FIRST_NAME, last_name = @LAST_NAME, mail_address = @MAIL_ADDRESS,
+                                            affiliation = @AFFILIATION, job_title = @JOB_TITLE, s_id = @S_ID, del_flg = @DEL_FLG";
+
+                    mysql_commnd.Parameters.AddWithValue("@ACCOUNT_NAME", this.account_name);
+                    mysql_commnd.Parameters.AddWithValue("@FIRST_NAME", this.first_name);
+                    mysql_commnd.Parameters.AddWithValue("@LAST_NAME", this.last_name);
+                    mysql_commnd.Parameters.AddWithValue("@MAIL_ADDRESS", this.mailaddress);
+                    mysql_commnd.Parameters.AddWithValue("@AFFILIATION", this.affiliation);
+                    mysql_commnd.Parameters.AddWithValue("@JOB_TITLE", this.job_title);
+                    mysql_commnd.Parameters.AddWithValue("@S_ID", this.sid);
+                    mysql_commnd.Parameters.AddWithValue("@DEL_FLG", this.del_flg);
+
+                    var reader = mysql_commnd.ExecuteNonQuery(); // クエリーの実行
+                    transaction.Commit();
+                    return true;
+                }
+                catch (Exception e)
+                {
+                    transaction.Rollback();
+                    loger_manager.write_log(e.Message, "error");
+                    return false;
+                }
+
+            }
+        }
+
 
         /// <summary>
         /// 同じ内容可比較
