@@ -77,11 +77,12 @@ namespace copy_and_authorization_tool
                     robocopy_process(src_dir, dst_dir, exception_list, row["コピーフィルター"].ToString(), diff_mode);
                     Console.WriteLine("run robocopy process : end");
 
-                    if (diff_mode) continue;
-
-                    Console.WriteLine("run conversion　association process : start");
-                    conversion_association(src_dir, dst_dir, ref comparison_list, ref exception_list);
-                    Console.WriteLine("run conversion　association process : end");
+                    if (diff_mode)
+                    {
+                        Console.WriteLine("run conversion　association process : start");
+                        conversion_association(src_dir, dst_dir, ref comparison_list, ref exception_list);
+                        Console.WriteLine("run conversion　association process : end");
+                    }
                     communication_with_external_server(src_dir, dst_dir, user_id, user_pw, false);
                 }
 
