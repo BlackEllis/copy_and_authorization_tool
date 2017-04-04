@@ -67,7 +67,7 @@ namespace tool_commons.model
         {
             try
             {
-                account_name = src["g_code"].ToString();
+                account_name = src["account_name"].ToString();
                 first_name = src["first_name"].ToString();
                 last_name = src["last_name"].ToString();
                 mailaddress = src["mail_address"].ToString();
@@ -113,10 +113,10 @@ namespace tool_commons.model
         /// DBからユーザー情報を取得
         /// </summary>
         /// <param name="connection_sql">DB接続情報文字列</param>
-        /// <param name="g_code">グローバルID</param>
+        /// <param name="account_name">アカウントID</param>
         /// <param name="del_flg">無効フラグ 1:無効アカウント　0:有効アカウント</param>
         /// <returns></returns>
-        public static List<user_info> get_user_infos(string connection_sql, string g_code, int del_flg=0)
+        public static List<user_info> get_user_infos(string connection_sql, string account_name, int del_flg=0)
         {
             try
             {
@@ -126,9 +126,9 @@ namespace tool_commons.model
                     mysql_cone.Open(); // データベースの接続開始
 
                     mysql_commnd.CommandText = @"SELECT * FROM user_info
-                                                WHERE g_code = @G_CODE
+                                                WHERE account_name = @ACCOUNT_NAME
                                                 AND del_flg = @DEL_FLG"; // 実行SQL
-                    mysql_commnd.Parameters.AddWithValue("@G_CODE", g_code); // バインド変数の割当
+                    mysql_commnd.Parameters.AddWithValue("@ACCOUNT_NAME", account_name); // バインド変数の割当
                     mysql_commnd.Parameters.AddWithValue("@DEL_FLG", del_flg);
                     var reader = mysql_commnd.ExecuteReader(); // クエリーの実行
 
