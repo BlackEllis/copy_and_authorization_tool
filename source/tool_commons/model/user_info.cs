@@ -130,7 +130,7 @@ namespace tool_commons.model
                                                 AND del_flg = @DEL_FLG"; // 実行SQL
                     mysql_commnd.Parameters.AddWithValue("@G_CODE", g_code); // バインド変数の割当
                     mysql_commnd.Parameters.AddWithValue("@DEL_FLG", del_flg);
-                    var reader = mysql_commnd.ExecuteReader(); // クエリーの事項
+                    var reader = mysql_commnd.ExecuteReader(); // クエリーの実行
 
                     List<user_info> dst_list = new List<user_info>();
                     while (reader.Read())
