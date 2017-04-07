@@ -25,7 +25,6 @@ namespace tool_commons.modules
         /// <param name="organizational_units">所属組織</param>
         /// <param name="user">接続ユーザーIDを</param>
         /// <param name="pass">接続ユーザーパスワード</param>
-        /// <param name="remain_hiierarch">取得階層</param>
         public void get_group_list(string host, string[] common_names, string[] organizational_units, string user="", string pass="")
         {
             DirectoryEntry obj_adam = default(DirectoryEntry);
@@ -113,9 +112,7 @@ namespace tool_commons.modules
                         string group_name = group.Properties["sAMAccountName"].Value.ToString();
                         string sid = new SecurityIdentifier((byte[])group.Properties["objectSid"][0], 0).ToString();
                         if (groups.ContainsKey(group_name))
-                        {
                             groups[group_name].add_user_info(user_obj);
-                        }
                         else
                             groups.Add(group_name, new group_info(group_name, sid, user_obj));
                     }
