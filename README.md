@@ -92,3 +92,6 @@ copy_and_authorization_tool.exe "EXTERNAL_FILE=./resources/external_setting.json
 
 ### 注意事項
 + グループのS-IDは対象に含めれないかも。。。 (対比表が必要な為)
+
+## License
++ MIT License
