@@ -65,6 +65,10 @@ robocopyとコピーしたアクセス権の移植プログラム
 
 
 ### copy_and_authorization_toolのみ
++ __DIALOG_MODE__
+    実行後にキーを押すまで待機する処理を行うかどうかのパラメータ
+    > True: キー押下まで待機 False: 待機しない
+
 + __DIFF_MODE__
 
     robocopyをテストモードで使用するか用パラメータ

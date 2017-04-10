@@ -14,6 +14,7 @@ namespace copy_and_authorization_tool
         public const string RESOURCES_KEY_LOGLEVEL = "LOG_LEVEL";                   // システムログの出力レベル
         public const string RESOURCES_KEY_EXTRACTINGLOG = "EXTRACTING_FILE";        // 抽出ログ出力先設定オプション
         public const string RESOURCES_KEY_EXTRACTINGLOGLEVEL = "EXTRACTING_LEVEL";  // 抽出ログの出力レベル
+        public const string RESOURCES_KEY_DIALOG_MODE = "DIALOG_MODE";              // 終了時に確認するかのオプション
         public const string RESOURCES_KEY_DIFF_MODE = "DIFF_MODE";                  // robocopyをテストモードで動作させるオプション
 
         // デフォルトの外部設定ファイルの情報

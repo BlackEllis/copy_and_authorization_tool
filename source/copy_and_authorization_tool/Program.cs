@@ -62,7 +62,7 @@ namespace copy_and_authorization_tool
                 }
 
                 // robocopyをテストモードで動作させるか判定用パラメータ取得
-                bool diff_mode = bool.Parse(utility_tools.get_value_from_hasharray(hash_array, constant.RESOURCES_KEY_DIFF_MODE, "False"));
+                bool diff_mode = utility_tools.get_value_from_hasharray(hash_array, constant.RESOURCES_KEY_DIFF_MODE, false);
 
                 // ロボコピー実行関数
                 foreach (DataRow row in copy_info_table.Rows)
@@ -94,8 +94,13 @@ namespace copy_and_authorization_tool
             }
 
             loger_manager.close();
-            Console.WriteLine("press any key to exit.");
-            Console.ReadKey();
+
+            bool dialog = utility_tools.get_value_from_hasharray(hash_array, constant.RESOURCES_KEY_DIALOG_MODE, true);
+            if (dialog)
+            {
+                Console.WriteLine("press any key to exit.");
+                Console.ReadKey();
+            }
         }
 
         /// <summary>
