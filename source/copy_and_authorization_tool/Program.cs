@@ -77,7 +77,7 @@ namespace copy_and_authorization_tool
                     robocopy_process(src_dir, dst_dir, exception_list, row["コピーフィルター"].ToString(), diff_mode);
                     Console.WriteLine("run robocopy process : end");
 
-                    if (diff_mode)
+                    if (!diff_mode)
                     {
                         Console.WriteLine("run conversion　association process : start");
                         conversion_association(src_dir, dst_dir, ref comparison_list, ref exception_list);
