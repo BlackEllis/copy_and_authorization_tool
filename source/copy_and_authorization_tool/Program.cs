@@ -192,10 +192,16 @@ namespace copy_and_authorization_tool
                 p.StartInfo.RedirectStandardOutput = true;
                 p.StartInfo.RedirectStandardError = true;
                 p.Start();
+
+                p.OutputDataReceived += (sender, e) => { loger_manager.write_log(e.Data); };
+                p.ErrorDataReceived += (sender, e) => { loger_manager.write_log(e.Data, "error"); };
+                p.BeginOutputReadLine();
+                p.BeginErrorReadLine();
                 loger_manager.write_log(p.StartInfo.Arguments);
-                loger_manager.write_log(p.StandardOutput.ReadToEnd());
-                loger_manager.write_log(p.StandardError.ReadToEnd(), "error");
+
                 p.WaitForExit();
+                p.CancelOutputRead();
+                p.CancelErrorRead();
             }
         }
 
@@ -235,10 +241,16 @@ namespace copy_and_authorization_tool
                     p.StartInfo.RedirectStandardOutput = true;
                     p.StartInfo.RedirectStandardError = true;
                     p.Start();
+
+                    p.OutputDataReceived += (sender, e) => { loger_manager.write_log(e.Data); };
+                    p.ErrorDataReceived += (sender, e) => { loger_manager.write_log(e.Data, "error"); };
+                    p.BeginOutputReadLine();
+                    p.BeginErrorReadLine();
                     loger_manager.write_log(p.StartInfo.Arguments);
-                    loger_manager.write_log(p.StandardOutput.ReadToEnd());
-                    loger_manager.write_log(p.StandardError.ReadToEnd(), "error");
+
                     p.WaitForExit();
+                    p.CancelOutputRead();
+                    p.CancelErrorRead();
                 }
             }
             catch (Exception e)
