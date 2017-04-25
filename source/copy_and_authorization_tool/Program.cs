@@ -272,25 +272,6 @@ namespace copy_and_authorization_tool
                     return true;
                 }
 
-                // フォルダの権限移管
-                if (!directory_authority_replacement(src_dir_info, dst_dir_info, ref comparison_list))
-                    throw new Exception("ディレクトリアクセス権設定でエラー");
-
-                // ファイルの権限移管
-                FileInfo[] src_file_list = src_dir_info.GetFiles();
-                FileInfo[] dst_file_list = dst_dir_info.GetFiles();
-                foreach (var src_file in src_file_list)
-                {
-                    foreach (var dst_file in dst_file_list)
-                    {
-                        if (!dst_file.Name.Equals(src_file.Name)) continue;
-
-                        if(!file_authority_replacement(src_file, dst_file, ref comparison_list))
-                            loger_manager.write_log($"該当ファイルがコピーされていないか、アクセス権がありません。：{src_file.FullName}", "error", "extracting");
-                        break;
-                    }
-                }
-
                 // フォルダを掘り下げる
                 DirectoryInfo[] src_inclusion_dirs = src_dir_info.GetDirectories();
                 DirectoryInfo[] dst_inclusion_dirs = dst_dir_info.GetDirectories();
@@ -304,6 +285,26 @@ namespace copy_and_authorization_tool
                         break;
                     }
                 }
+
+                // ファイルの権限移管
+                FileInfo[] src_file_list = src_dir_info.GetFiles();
+                FileInfo[] dst_file_list = dst_dir_info.GetFiles();
+                foreach (var src_file in src_file_list)
+                {
+                    foreach (var dst_file in dst_file_list)
+                    {
+                        if (!dst_file.Name.Equals(src_file.Name)) continue;
+
+                        if (!file_authority_replacement(src_file, dst_file, ref comparison_list))
+                            loger_manager.write_log($"該当ファイルがコピーされていないか、アクセス権がありません。：{src_file.FullName}", "error", "extracting");
+                        break;
+                    }
+                }
+
+                // フォルダの権限移管
+                if (!directory_authority_replacement(src_dir_info, dst_dir_info, ref comparison_list))
+                    throw new Exception("ディレクトリアクセス権設定でエラー");
+
                 return true;
             }
             catch (Exception e)
@@ -326,11 +327,21 @@ namespace copy_and_authorization_tool
             {
                 DirectorySecurity src_dir_security = src_dir.GetAccessControl();    // 移管元のアクセス権取得
                 DirectorySecurity dst_dir_security = dst_dir.GetAccessControl();    // 移管先のアクセス権取得
+                Func<string, string> get_account_name = (string identity_reference) =>
+                {
+                    int cat_pint = identity_reference.LastIndexOf('\\') + 1;
+                    return identity_reference.Substring(cat_pint);
+                };
+
+                if ((dst_dir_security.AreAccessRulesProtected == false) && (src_dir_security.AreAccessRulesProtected == true)) // コピー元が継承を切っており、コピー先が継承権を持っている場合のみ
+                {
+                    dst_dir_security = authority_triming(src_dir, dst_dir);
+                    if (dst_dir_security == null) throw new Exception("継承権設定でエラーが発生");
+                }
 
                 foreach (FileSystemAccessRule src_rules in src_dir_security.GetAccessRules(true, true, typeof(NTAccount)))
                 {
-                    int cat_pint = src_rules.IdentityReference.ToString().LastIndexOf('\\') + 1;
-                    string account_name = src_rules.IdentityReference.ToString().Substring(cat_pint);
+                    string account_name = get_account_name(src_rules.IdentityReference.ToString());
                     if (comparison_list.ContainsKey(account_name))
                     {
 
@@ -425,6 +436,54 @@ namespace copy_and_authorization_tool
             {
                  loger_manager.write_log(e.Message, "error");
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// コピー元でアクセス権の継承が切られている場合、コピー先で継承によって追加されいるアクセス権を削除する
+        /// </summary>
+        /// <param name="src_dir">移管元ディレクトリ</param>
+        /// <param name="dst_dir">移管先ディレクトリ</param>
+        /// <returns></returns>
+        private static DirectorySecurity authority_triming(DirectoryInfo src_dir, DirectoryInfo dst_dir)
+        {
+            try
+            {
+                DirectorySecurity src_dir_security = src_dir.GetAccessControl();    // 移管元のアクセス権取得
+                DirectorySecurity dst_dir_security = dst_dir.GetAccessControl();    // 移管先のアクセス権取得
+                Func<string, string> get_account_name = (string identity_reference) =>
+                {
+                    int cat_pint = identity_reference.LastIndexOf('\\') + 1;
+                    return identity_reference.Substring(cat_pint);
+                };
+
+                dst_dir_security.SetAccessRuleProtection(src_dir_security.AreAccessRulesProtected, src_dir_security.AreAccessRulesCanonical); // ディレクトリのアクセス権の継承に関しての設定
+                dst_dir.SetAccessControl(dst_dir_security); // 継承権の設定
+
+                dst_dir_security = dst_dir.GetAccessControl();    // 継承権の再設定を行なったので、オブジェクトを再取得
+                foreach (FileSystemAccessRule dst_rules in dst_dir_security.GetAccessRules(true, true, typeof(NTAccount)))
+                {
+                    string dst_account_name = get_account_name(dst_rules.IdentityReference.ToString());
+                    bool chek_flg = true;
+                    foreach (FileSystemAccessRule src_rules in src_dir_security.GetAccessRules(true, true, typeof(NTAccount)))
+                    {
+                        string src_account_name = get_account_name(src_rules.IdentityReference.ToString());
+                        if (dst_account_name.Equals(src_account_name))
+                        {
+                            chek_flg = false;
+                            break;
+                        }
+                    }
+                    if (chek_flg) dst_dir_security.PurgeAccessRules(dst_rules.IdentityReference);
+                }
+
+                dst_dir.SetAccessControl(dst_dir_security); // アクセス権の設定
+                return dst_dir_security;
+            }
+            catch (Exception e)
+            {
+                loger_manager.write_log(e.Message, "error");
+                return null;
             }
         }
 
