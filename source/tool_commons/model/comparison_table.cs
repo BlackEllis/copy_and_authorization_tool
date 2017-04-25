@@ -14,6 +14,11 @@ namespace tool_commons.model
             comparsion_units = new List<comparsion_unit>();
         }
 
+        public void list_sort()
+        {
+            comparsion_units.Sort((a, b) => string.Compare(a.account_name, b.account_name));
+        }
+
         public Dictionary<string, comparsion_unit> transform_to_dictionary()
         {
             Dictionary<string, comparsion_unit> dst_dictionary = new Dictionary<string, comparsion_unit>();

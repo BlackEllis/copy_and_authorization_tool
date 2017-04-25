@@ -256,6 +256,7 @@ namespace comparison_front_creating_tool
                 }
             }
 
+            compari_table.list_sort(); // 全て格納後、ソートを行う
             return compari_table;
         }
 
