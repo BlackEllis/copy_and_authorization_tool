@@ -133,7 +133,7 @@ namespace tool_commons.modules
         /// <param name="replace_category">差し替えログ種別</param>
         private void write_log(string str, string log_category)
         {
-            if (str == "") return;
+            if ((str == null) || (str.Equals(""))) return;
             if (_stream.Equals(null))
             {
                 Console.WriteLine(str); // ログ出力オブジェクトがない場合はコンソールに表示
