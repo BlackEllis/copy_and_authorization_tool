@@ -34,7 +34,11 @@ namespace verification_tool
                 string resources_dir = utility_tools.get_value_from_hasharray(hash_array, "RESOURCES_DIR", constant.RESOURCES_DIR);
 
                 Console.WriteLine("log feature setup : start");
-                setup_logs(hash_array, log_dir); // ログ、エラーファイルのセットアップ
+#if DEBUG
+                setup_logs(hash_array, log_dir, true); // ログ、エラーファイルのセットアップ
+#else
+                setup_logs(hash_array, log_dir, false);
+#endif
                 Console.WriteLine("log feature setup : end");
 
                 // デシリアライズした結果を連想配列に格納
@@ -95,7 +99,7 @@ namespace verification_tool
         /// </summary>
         /// <param name="args">起動引数を連想配列にしたもの</param>
         /// <param name="log_dir"></param>
-        private static void setup_logs(Dictionary<string, string> args, string log_dir)
+        private static void setup_logs(Dictionary<string, string> args, string log_dir, bool debug_flg)
         {
             // ログファイルの関係設定
             string log_file = json_module.get_external_resource("default_log_filename", constant.DEFAULT_LOG_FILENAME);
@@ -114,13 +118,8 @@ namespace verification_tool
             loger_module.E_LOG_LEVEL extracting_output_level = (loger_module.E_LOG_LEVEL)Enum.Parse(typeof(loger_module.E_LOG_LEVEL), wk_extracting_output_level);
 
             loger_manager.setup_manager();
-#if DEBUG
-            loger_manager.add_stream("info", log_file, log_dir, log_encode, log_output_level, true);
-            loger_manager.add_stream("extracting", extracting_file, log_dir, extracting_encode, extracting_output_level, true);
-#else
-            loger_manager.add_stream("info", log_file, log_dir, log_encode, log_output_level);
-            loger_manager.add_stream("extracting", extracting_file, log_dir, extracting_encode, extracting_output_level);
-#endif
+            loger_manager.add_stream("info", log_file, log_dir, log_encode, log_output_level, debug_flg);
+            loger_manager.add_stream("extracting", extracting_file, log_dir, extracting_encode, extracting_output_level, debug_flg);
         }
 
         /// <summary>

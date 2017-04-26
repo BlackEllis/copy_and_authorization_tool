@@ -21,11 +21,9 @@ namespace copy_and_authorization_tool
             try
             {
                 Console.WriteLine("read setting from json : start");
-                json_module.setup(
-                    utility_tools.get_value_from_hasharray(hash_array,
-                                            constant.RESOURCES_KEY_EXTERNAL,
-                                            constant.RESOURCES_DIR + constant.EXTERNAL_RESOURCE_FILENAME)
-                );
+                json_module.setup(utility_tools.get_value_from_hasharray(hash_array,
+                                    constant.RESOURCES_KEY_EXTERNAL,
+                                    constant.RESOURCES_DIR + constant.EXTERNAL_RESOURCE_FILENAME));
                 Console.WriteLine("read setting from json : end");
 
                 // 各外部ファイルのディレクトリ先を設定
@@ -34,7 +32,11 @@ namespace copy_and_authorization_tool
                 string resources_dir = utility_tools.get_value_from_hasharray(hash_array, "RESOURCES_DIR", constant.RESOURCES_DIR);
 
                 Console.WriteLine("log feature setup : start");
-                setup_logs(hash_array, log_dir); // ログ、エラーファイルのセットアップ
+#if DEBUG
+                setup_logs(hash_array, log_dir, true); // ログ、エラーファイルのセットアップ
+#else
+                setup_logs(hash_array, log_dir, false); // ログ、エラーファイルのセットアップ
+#endif
                 Console.WriteLine("log feature setup : end");
 
                 // デシリアライズした結果を連想配列に格納
@@ -47,18 +49,20 @@ namespace copy_and_authorization_tool
                                                                                     json_module.get_external_resource("copy_dir_info_sheet"),
                                                                                     int.Parse(json_module.get_external_resource("copy_dir_info_sheet_offset")));
                 DataTable exception_copy_table = excel_converter_module.read_excel_by_row(resouces_excel_file, resources_dir,
-                                                                                        json_module.get_external_resource("exception_copy_dir_sheet"),
-                                                                                        int.Parse(json_module.get_external_resource("exception_copy_dir_sheet_offset")));
+                                                                                    json_module.get_external_resource("exception_copy_dir_sheet"),
+                                                                                    int.Parse(json_module.get_external_resource("exception_copy_dir_sheet_offset")));
 
                 if (copy_info_table == null) throw new Exception("コピー対比表情報取得に失敗しました");
                 if (exception_copy_table == null) throw new Exception("例外対象一覧の取得に失敗しました");
 
+                // 対象外リストの作成
                 List<string> exception_list = new List<string>();
                 foreach (DataRow row in exception_copy_table.Rows)
                 {
                     string exception_copy_dir = row["対象外ディレクトリ名"].ToString();
-                    if (!exception_copy_dir.Equals(""))
-                        exception_list.Add(exception_copy_dir);
+                    if (exception_copy_dir.Equals("")) continue; // 空であれば、リスト追加を行わない
+
+                    exception_list.Add(exception_copy_dir);
                 }
 
                 // robocopyをテストモードで動作させるか判定用パラメータ取得
@@ -107,8 +111,9 @@ namespace copy_and_authorization_tool
         /// ログ、エラーファイルのセットアップ関数
         /// </summary>
         /// <param name="args">起動引数を連想配列にしたもの</param>
-        /// <param name="log_dir"></param>
-        private static void setup_logs(Dictionary<string, string>args, string log_dir)
+        /// <param name="log_dir">ログ出力ディレクトリ情報</param>
+        /// <param name="debug_flg">デバッグフラグ</param>
+        private static void setup_logs(Dictionary<string, string>args, string log_dir, bool debug_flg)
         {
             // ログファイルの関係設定
             string log_file = json_module.get_external_resource("default_log_filename", constant.DEFAULT_LOG_FILENAME);
@@ -127,13 +132,8 @@ namespace copy_and_authorization_tool
             loger_module.E_LOG_LEVEL extracting_output_level = (loger_module.E_LOG_LEVEL)Enum.Parse(typeof(loger_module.E_LOG_LEVEL), wk_extracting_output_level);
 
             loger_manager.setup_manager();
-#if DEBUG
-            loger_manager.add_stream("info", log_file, log_dir, log_encode, log_output_level, true);
-            loger_manager.add_stream("extracting", extracting_file, log_dir, extracting_encode, extracting_output_level, true);
-#else
-            loger_manager.add_stream("info", log_file, log_dir, log_encode, log_output_level);
-            loger_manager.add_stream("extracting", extracting_file, log_dir, extracting_encode, extracting_output_level);
-#endif
+            loger_manager.add_stream("info", log_file, log_dir, log_encode, log_output_level, debug_flg);
+            loger_manager.add_stream("extracting", extracting_file, log_dir, extracting_encode, extracting_output_level, debug_flg);
         }
 
         /// <summary>
@@ -169,40 +169,31 @@ namespace copy_and_authorization_tool
         /// <param name="connection_mode">true: 接続　false: 切断</param>
         private static void communication_with_external_server(string src_dir, string dst_dir, string user_id, string user_pw, bool connection_mode=true)
         {
-            // コピー元、コピー先何れかが共有フォルダであれば処理を行う
-            // 両方共有フォルダだった場合は処理を行わない
-            if (src_dir.StartsWith("\\\\") == dst_dir.StartsWith("\\\\")) return ;
-            if (user_id.Equals("") || user_pw.Equals("")) return ;
-
-            string target_name = src_dir.StartsWith("\\\\") ? src_dir : dst_dir;
-
-            int cat_point = target_name.LastIndexOf("$");
-            string connection_name = target_name;
-            if (cat_point != -1) connection_name = target_name.Substring(0, cat_point + 1); // PC名＋共有フォルダまでの文字列の切り出し
-
-            using (Process p = new Process())
+            try
             {
+                // コピー元、コピー先何れかが共有フォルダであれば処理を行う
+                // 両方共有フォルダだった場合は処理を行わない
+                if (src_dir.StartsWith("\\\\") == dst_dir.StartsWith("\\\\")) return;
+                if (user_id.Equals("") || user_pw.Equals("")) return;
+
+                string target_name = src_dir.StartsWith("\\\\") ? src_dir : dst_dir;
+
+                int cat_point = target_name.LastIndexOf("$");
+                string connection_name = target_name;
+                if (cat_point != -1) connection_name = target_name.Substring(0, cat_point + 1); // PC名＋共有フォルダまでの文字列の切り出し
+
+                string commond_str = "";
                 if (connection_mode)
-                    p.StartInfo.Arguments = string.Format("/C NET USE \"{0}\" \"{1}\" /user:\"{2}\"" , connection_name, user_pw, user_id);
+                    commond_str = string.Format("/C NET USE \"{0}\" \"{1}\" /user:\"{2}\"", connection_name, user_pw, user_id);
                 else
-                    p.StartInfo.Arguments = string.Format("/C NET USE \"{0}\" /delete", connection_name);
-                p.StartInfo.FileName = "cmd.exe";
-                p.StartInfo.CreateNoWindow = true;
-                p.StartInfo.UseShellExecute = false;
-                p.StartInfo.RedirectStandardOutput = true;
-                p.StartInfo.RedirectStandardError = true;
-                p.Start();
-
-                p.OutputDataReceived += (sender, e) => { loger_manager.write_log(e.Data); };
-                p.ErrorDataReceived += (sender, e) => { loger_manager.write_log(e.Data, "error"); };
-                p.BeginOutputReadLine();
-                p.BeginErrorReadLine();
-                loger_manager.write_log(p.StartInfo.Arguments);
-
-                p.WaitForExit();
-                p.CancelOutputRead();
-                p.CancelErrorRead();
+                    commond_str = string.Format("/C NET USE \"{0}\" /delete", connection_name);
+                cmd_process(commond_str);
             }
+            catch (Exception e)
+            {
+                loger_manager.write_log(e.Message, "error");
+            }
+
         }
 
         /// <summary>
@@ -229,12 +220,25 @@ namespace copy_and_authorization_tool
                     exception_dir_str += $" {folder_name}";
                 }
 
+                string commond_str = "";
+                if (diff_mode)
+                    commond_str = string.Format("/C ROBOCOPY \"{0}\" \"{1}\" \"{2}\" /L" + json_module.get_external_resource("robocopy_option") + exception_dir_str, src_dir, dst_dir, copy_filter);
+                else
+                    commond_str = string.Format("/C ROBOCOPY \"{0}\" \"{1}\" \"{2}\"" + json_module.get_external_resource("robocopy_option") + exception_dir_str, src_dir, dst_dir, copy_filter);
+                cmd_process(commond_str);
+            }
+            catch (Exception e)
+            {
+                loger_manager.write_log(e.Message, "error");
+            }
+        }
+
+        private static void cmd_process(string commond)
+        {
+            try {
                 using (Process p = new Process())
                 {
-                    if (diff_mode)
-                        p.StartInfo.Arguments = string.Format("/C ROBOCOPY \"{0}\" \"{1}\" \"{2}\" /L" + json_module.get_external_resource("robocopy_option") + exception_dir_str, src_dir, dst_dir, copy_filter);
-                    else
-                        p.StartInfo.Arguments = string.Format("/C ROBOCOPY \"{0}\" \"{1}\" \"{2}\"" + json_module.get_external_resource("robocopy_option") + exception_dir_str, src_dir, dst_dir, copy_filter);
+                    p.StartInfo.Arguments = commond;
                     p.StartInfo.FileName = "cmd.exe";
                     p.StartInfo.CreateNoWindow = true;
                     p.StartInfo.UseShellExecute = false;
@@ -255,7 +259,7 @@ namespace copy_and_authorization_tool
             }
             catch (Exception e)
             {
-                 loger_manager.write_log(e.Message, "error");
+                loger_manager.write_log(e.Message, "error");
             }
         }
 
@@ -321,7 +325,7 @@ namespace copy_and_authorization_tool
             }
             catch (Exception e)
             {
-                 loger_manager.write_log(e.Message, "error");
+                loger_manager.write_log(e.Message, "error");
                 return false;
             }
         }
@@ -366,10 +370,8 @@ namespace copy_and_authorization_tool
                         }
 
                         loger_manager.write_log($"変換対象アカウント： {unit.account_name} {unit.conversion_original} → {unit.after_conversion} | {src_rules.FileSystemRights.ToString()}", "conversion");
-                        dst_dir_security.AddAccessRule(new FileSystemAccessRule(unit.after_conversion,
-                                                                                src_rules.FileSystemRights,
-                                                                                src_rules.InheritanceFlags,
-                                                                                src_rules.PropagationFlags,
+                        dst_dir_security.AddAccessRule(new FileSystemAccessRule(unit.after_conversion, src_rules.FileSystemRights,
+                                                                                src_rules.InheritanceFlags,src_rules.PropagationFlags,
                                                                                 src_rules.AccessControlType));
                     }
                     else
@@ -388,7 +390,7 @@ namespace copy_and_authorization_tool
             }
             catch (Exception e)
             {
-                loger_manager.write_log($"{e.GetType()} {e.Message}", "error", "info");
+                loger_manager.write_log($"{e.GetType()}\t{e.Message}", "error", "info");
                 return false;
             }
 
@@ -446,7 +448,7 @@ namespace copy_and_authorization_tool
             }
             catch (Exception e)
             {
-                 loger_manager.write_log(e.Message, "error");
+                loger_manager.write_log(e.Message, "error");
                 return false;
             }
         }
@@ -497,45 +499,6 @@ namespace copy_and_authorization_tool
                 loger_manager.write_log(e.Message, "error");
                 return null;
             }
-        }
-
-        /// <summary>
-        /// ディレクトリに設定されているのアクセス権を出力
-        /// </summary>
-        /// <param name="src_dir">比較元ディレクトリフルパス</param>
-        /// <param name="dst_dir">比較先ディレクトリフルパス</param>
-        private static void output_access_permission(string src_dir, string dst_dir)
-        {
-            Func<FileSystemAccessRule, string> security_output = (FileSystemAccessRule fsar) =>
-            {
-                return fsar.AccessControlType
-                        + "\t" + fsar.IdentityReference
-                        + "\t" + fsar.FileSystemRights.ToString()
-                        + "\t" + fsar.IsInherited.ToString()
-                        + "\t" + fsar.InheritanceFlags.ToString()
-                        + "\t" + fsar.PropagationFlags.ToString();
-            };
-
-            if (src_dir.Equals("") || dst_dir.Equals(""))
-            {
-                loger_manager.write_log($"比較対象設定が不適切\t \t\tsrc_dir:{src_dir}\n\t\tdst_dir:{dst_dir}");
-                return;
-            }
-
-            DirectorySecurity src_dir_security = Directory.GetAccessControl(src_dir);
-            DirectorySecurity dst_dir_security = Directory.GetAccessControl(dst_dir);
-
-            loger_manager.write_log("AccessControlType\tAccountName\tFileSystemRights\tIsInherited"
-+ "\tInheritanceFlags\tPropagationFlags");
-            AuthorizationRuleCollection src_rules = src_dir_security.GetAccessRules(true, true, typeof(NTAccount));
-            for (int i = 0; i < src_rules.Count; i++)
-                loger_manager.write_log(security_output((FileSystemAccessRule)src_rules[i]));
-
-            loger_manager.write_log("AccessControlType\tAccountName\tFileSystemRights\tIsInherited"
-+ "\tInheritanceFlags\tPropagationFlags");
-            AuthorizationRuleCollection dst_rules = dst_dir_security.GetAccessRules(true, true, typeof(NTAccount));
-            for (int i = 0; i < dst_rules.Count; i++)
-                loger_manager.write_log(security_output((FileSystemAccessRule)dst_rules[i]));
         }
 
     }

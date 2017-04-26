@@ -33,7 +33,11 @@ namespace comparison_front_creating_tool
                 string resources_dir = utility_tools.get_value_from_hasharray(hash_array, "RESOURCES_DIR", constant.RESOURCES_DIR);
 
                 Console.WriteLine("setup log module : start");
-                setup_logs(hash_array, log_dir); // ログ、エラーファイルのセットアップ
+#if DEBUG
+                setup_logs(hash_array, log_dir, true); // ログ、エラーファイルのセットアップ
+#else
+                setup_logs(hash_array, log_dir, false);
+#endif
                 Console.WriteLine("setup log module : end");
 
                 comparison_table compari_table = default(comparison_table);
@@ -69,7 +73,7 @@ namespace comparison_front_creating_tool
         /// </summary>
         /// <param name="args">起動引数を連想配列にしたもの</param>
         /// <param name="log_dir"></param>
-        private static void setup_logs(Dictionary<string, string>args, string log_dir)
+        private static void setup_logs(Dictionary<string, string>args, string log_dir, bool debug_flg)
         {
 
             // ログファイルの関係設定
@@ -83,13 +87,8 @@ namespace comparison_front_creating_tool
             string extracting_encode = json_module.get_external_resource("error_file_encode", constant.EXTRACTING_FILE_ENCODE);
 
             loger_manager.setup_manager();
-#if DEBUG
-            loger_manager.add_stream("info", log_file, log_dir, log_encode, loger_module.E_LOG_LEVEL.E_ALL, true);
-            loger_manager.add_stream("extracting", extracting_file, log_dir, extracting_encode, loger_module.E_LOG_LEVEL.E_ALL, true);
-#else
-            loger_manager.add_stream("info", log_file, log_dir, log_encode, loger_module.E_LOG_LEVEL.E_ERROR | loger_module.E_LOG_LEVEL.E_WARNING);
-            loger_manager.add_stream("error", extracting_file, log_dir, extracting_encode, loger_module.E_LOG_LEVEL.E_ALL);
-#endif
+            loger_manager.add_stream("info", log_file, log_dir, log_encode, loger_module.E_LOG_LEVEL.E_ALL, debug_flg);
+            loger_manager.add_stream("extracting", extracting_file, log_dir, extracting_encode, loger_module.E_LOG_LEVEL.E_ALL, debug_flg);
         }
 
         /// <summary>
