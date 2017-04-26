@@ -146,7 +146,8 @@ namespace copy_and_authorization_tool
         {
             try
             {
-                using (StreamReader read_stream = new StreamReader(src_dir + src_file, Encoding.GetEncoding(constant.EXTERNAL_RESOURCE_ENCODE)))
+                using (FileStream fl_stream = new FileStream(src_dir + src_file, FileMode.Open, FileAccess.Read, FileShare.Read))
+                using (StreamReader read_stream = new StreamReader(fl_stream, Encoding.GetEncoding(constant.EXTERNAL_RESOURCE_ENCODE)))
                 {
                     System.Xml.Serialization.XmlSerializer serializer = new System.Xml.Serialization.XmlSerializer(typeof(comparison_table));
                     comparison_table dst_table = (comparison_table)serializer.Deserialize(read_stream);

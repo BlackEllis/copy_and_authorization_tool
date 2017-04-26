@@ -94,14 +94,14 @@ namespace tool_commons.model
                 return true;
             };
 
-            write_log(indent + "account_name : " + account_name);
-            write_log(indent + "first_name : " + first_name);
-            write_log(indent + "last_name : " + last_name);
-            write_log(indent + "mailaddress : " + mailaddress);
-            write_log(indent + "affiliation : " + affiliation);
-            write_log(indent + "job_title : " + job_title);
-            write_log(indent + "sid : " + sid);
-            write_log(indent + "del_flg : " + del_flg);
+            write_log($"{indent}account_name : {account_name}");
+            write_log($"{indent}first_name : {first_name}");
+            write_log($"{indent}last_name : {last_name}");
+            write_log($"{indent}mailaddress : {mailaddress}");
+            write_log($"{indent}affiliation : {affiliation}");
+            write_log($"{indent}job_title : {job_title}");
+            write_log($"{indent}sid : {sid}");
+            write_log($"{indent}del_flg : {del_flg}");
         }
 
         public string get_full_name()
@@ -130,7 +130,7 @@ namespace tool_commons.model
                                                 AND del_flg = @DEL_FLG"; // 実行SQL
                     mysql_commnd.Parameters.AddWithValue("@ACCOUNT_NAME", account_name); // バインド変数の割当
                     mysql_commnd.Parameters.AddWithValue("@DEL_FLG", del_flg);
-                    var reader = mysql_commnd.ExecuteReader(); // クエリーの実行
+                    MySqlDataReader reader = mysql_commnd.ExecuteReader(); // クエリーの実行
 
                     List<user_info> dst_list = new List<user_info>();
                     while (reader.Read())
@@ -166,11 +166,11 @@ namespace tool_commons.model
                 try
                 {
                     mysql_commnd.CommandText = @"INSERT INTO user_info
-                                            (account_name, first_name, last_name, mail_address, affiliation, job_title, s_id, del_flg)
-                                        VALUES (@ACCOUNT_NAME, @FIRST_NAME, @LAST_NAME, @MAIL_ADDRESS, @AFFILIATION, @JOB_TITLE, @S_ID, @DEL_FLG)
-                                        ON DUPLICATE KEY UPDATE
-                                            account_name = @ACCOUNT_NAME, first_name = @FIRST_NAME, last_name = @LAST_NAME, mail_address = @MAIL_ADDRESS,
-                                            affiliation = @AFFILIATION, job_title = @JOB_TITLE, s_id = @S_ID, del_flg = @DEL_FLG";
+                                                    (account_name, first_name, last_name, mail_address, affiliation, job_title, s_id, del_flg)
+                                                    VALUES (@ACCOUNT_NAME, @FIRST_NAME, @LAST_NAME, @MAIL_ADDRESS, @AFFILIATION, @JOB_TITLE, @S_ID, @DEL_FLG)
+                                                 ON DUPLICATE KEY UPDATE
+                                                    account_name = @ACCOUNT_NAME, first_name = @FIRST_NAME, last_name = @LAST_NAME, mail_address = @MAIL_ADDRESS,
+                                                    affiliation = @AFFILIATION, job_title = @JOB_TITLE, s_id = @S_ID, del_flg = @DEL_FLG";
 
                     mysql_commnd.Parameters.AddWithValue("@ACCOUNT_NAME", this.account_name);
                     mysql_commnd.Parameters.AddWithValue("@FIRST_NAME", this.first_name);

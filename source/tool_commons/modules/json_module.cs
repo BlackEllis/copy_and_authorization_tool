@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Xml;
@@ -47,7 +48,8 @@ namespace tool_commons.modules
         {
             try
             {
-                using (var st_reader = new System.IO.StreamReader(src_file, System.Text.Encoding.UTF8))
+                using (FileStream file_st = new FileStream(src_file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                using (var st_reader = new System.IO.StreamReader(file_st, System.Text.Encoding.UTF8))
                 {
                     string json_str = st_reader.ReadToEnd();
                     XmlDictionaryReader xml_reader = JsonReaderWriterFactory.CreateJsonReader(Encoding.UTF8.GetBytes(json_str), XmlDictionaryReaderQuotas.Max);

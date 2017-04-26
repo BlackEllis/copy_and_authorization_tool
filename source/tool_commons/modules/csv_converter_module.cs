@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Text;
 using tool_commons.modules;
 
@@ -21,15 +22,16 @@ namespace tool_commons
             try
             {
                 // csvファイルを開く
-                using (var stream_read = new System.IO.StreamReader(file_name, Encoding.GetEncoding(in_encode)))
+                using (FileStream fl_stream = new FileStream(file_name, FileMode.Open, FileAccess.Read, FileShare.Read))
+                using (StreamReader stream_read = new StreamReader(fl_stream, Encoding.GetEncoding(in_encode)))
                 {
                     // ストリームの末尾まで繰り返す
                     while (!stream_read.EndOfStream)
                     {
                         // ファイルから一行読み込む
-                        var line = encode_function(stream_read.ReadLine(), in_encode, "utf-8");
+                        string line = encode_function(stream_read.ReadLine(), in_encode, "utf-8");
                         // 読み込んだ一行をカンマ毎に分けて配列に格納する
-                        var values = line.Split(',');
+                        string[] values = line.Split(',');
 
                         dst_list.Add(values);
                     }
@@ -58,16 +60,15 @@ namespace tool_commons
             try
             {
                 //書き込むファイルを開く
-                using (var sr = new System.IO.StreamWriter(file_name, append, Encoding.GetEncoding(write_encode)))
+                using (StreamWriter sr = new StreamWriter(file_name, append, Encoding.GetEncoding(write_encode)))
                 {
-
                     int colCount = src_dt.Columns.Count;
                     int lastColIndex = colCount - 1;
 
                     //ヘッダを書き込む
                     if (write_header)
                     {
-                        for (int i=0; i<colCount; ++i)
+                        for (int i = 0; i < colCount; ++i)
                         {
                             //ヘッダの取得
                             string header_field_str = encode_function(src_dt.Columns[i].Caption, "utf-8", write_encode);
@@ -85,7 +86,7 @@ namespace tool_commons
                     //レコードを書き込む
                     foreach (DataRow row in src_dt.Rows)
                     {
-                        for (int i=0; i<colCount; ++i)
+                        for (int i = 0; i < colCount; ++i)
                         {
                             string field_str = encode_function(row[i].ToString(), "utf-8", write_encode);
                             //フィールドを書き込む

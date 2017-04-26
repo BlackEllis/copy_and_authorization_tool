@@ -17,6 +17,7 @@ namespace tool_commons.modules
         };
 
         private E_LOG_LEVEL _output_level;
+        private FileStream _fl_stream;
         private StreamWriter _stream;
 
         /// <summary>
@@ -60,28 +61,24 @@ namespace tool_commons.modules
         /// <returns>生成されたファイル名称</returns>
         private static string create_log_filename(string file_name, bool debug_flg)
         {
-            string name = "";
-            string extension = "";
-
+            string name = file_name;
+            string extension = ".log";
+            string dst_filename = "";
+            System.Diagnostics.Process process = System.Diagnostics.Process.GetCurrentProcess();
             DateTime dt_obj = DateTime.Now;
             string dt_stmp = dt_obj.ToString("yyyy-MM-dd_") + dt_obj.ToString("HHmmss");
-            int cat_point = file_name.LastIndexOf(".");
+            int cat_point = file_name.LastIndexOf("."); // 拡張子
+
             if (cat_point != -1)
             {
                 name = file_name.Substring(0, cat_point);
                 extension = file_name.Substring(cat_point);
             }
-            else
-            {
-                name = file_name;
-                extension = ".log";
-            }
 
-            string dst_filename = "";
             if (debug_flg == true)
-                dst_filename = name + extension;
+                dst_filename = $"{name}{extension}";
             else
-                dst_filename = name + "_" + dt_stmp + extension;
+                dst_filename = $"{name}_{process.Id.ToString()}_{dt_stmp}{extension}";
 
             return dst_filename;
 
@@ -111,7 +108,8 @@ namespace tool_commons.modules
         loger_module(string file_name, string file_encode, E_LOG_LEVEL log_level)
         {
             _output_level = log_level;
-            _stream = new StreamWriter(file_name, true, Encoding.GetEncoding(file_encode));
+            _fl_stream = new FileStream(file_name, FileMode.Append, FileAccess.Write, FileShare.Read);
+            _stream = new StreamWriter(_fl_stream, Encoding.GetEncoding(file_encode));
         }
 
         /// <summary>

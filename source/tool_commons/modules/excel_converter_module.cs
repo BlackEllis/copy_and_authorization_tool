@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Data;
+using System.IO;
 using ClosedXML.Excel;
 
 namespace tool_commons.modules
@@ -27,15 +28,16 @@ namespace tool_commons.modules
 
             try
             {
-                using (var work_book = new XLWorkbook(read_file))
+                using(FileStream stream = new FileStream(read_file, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read))
+                using (XLWorkbook work_book = new XLWorkbook(stream, XLEventTracking.Disabled))
                 {
                     // シートを開く
-                    var ws = work_book.Worksheet(sheet_name);
+                    IXLWorksheet ws = work_book.Worksheet(sheet_name);
 
-                    var table = ws.RangeUsed().AsTable();
+                    IXLTable table = ws.RangeUsed().AsTable();
                     int field_count = 0;
                     // フィールド名を取得
-                    foreach (var field in table.Fields)
+                    foreach (IXLTableField field in table.Fields)
                     {
                         if (field_count >= read_offset_row)
                         {
@@ -47,7 +49,7 @@ namespace tool_commons.modules
 
                     // データを行単位で取得
                     int loop_start = read_offset_row + 1; // 読み取りは1~
-                    foreach (var dataRow in table.DataRange.Rows())
+                    foreach (IXLTableRow dataRow in table.DataRange.Rows())
                     {
                         DataRow row = dst_td.NewRow();
                         int row_num = dataRow.CellCount()+1; // 読み取りが1~なので＋１する
@@ -82,8 +84,8 @@ namespace tool_commons.modules
         /// <returns>最後に出現した具切り文字までの文字列</returns>
         private static string path_extracted(string path, string padding_font = "/")
         {
-            var st_path = path.Replace("\\", padding_font);
-            var cat_point = st_path.LastIndexOf(padding_font);
+            string st_path = path.Replace("\\", padding_font);
+            int cat_point = st_path.LastIndexOf(padding_font);
             if (cat_point == -1) return "";
 
             return st_path.Substring(0, cat_point);
