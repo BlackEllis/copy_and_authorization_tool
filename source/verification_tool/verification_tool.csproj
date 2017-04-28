@@ -65,7 +65,8 @@
   <Import Project="..\tool_commons\tool_commons.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>"c:\Program Files\Microsoft\ILMerge\ILMerge.exe" /ndebug /wildcards /targetplatform:v4,"%25ProgramFiles%25\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6.1" /out:$(TargetDir)$(TargetName)Merged$(TargetExt) $(TargetPath) $(TargetDir)*.dll</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
