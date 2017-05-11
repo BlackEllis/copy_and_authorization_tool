@@ -362,30 +362,30 @@ namespace copy_and_authorization_tool
                     if (comparison_list.ContainsKey(account_name))
                     {
 
-                        loger_manager.write_log($"適応先： {dst_dir.FullName} " + ((src_rules.InheritanceFlags & InheritanceFlags.ContainerInherit) > 0 ? "このフォルダとサブフォルダ" : "このフォルダのみ"), "conversion");
+                        loger_manager.write_log($"適応先：\t{dst_dir.FullName} " + ((src_rules.InheritanceFlags & InheritanceFlags.ContainerInherit) > 0 ? "このフォルダとサブフォルダ" : "このフォルダのみ"), "conversion");
                         comparsion_unit unit = comparison_list[account_name];
                         if (unit.del_flg == 1)
                         {
-                            loger_manager.write_log($"削除対象アカウント： {unit.account_name} {unit.conversion_original} | {src_rules.FileSystemRights.ToString()}", "conversion");
+                            loger_manager.write_log($"削除対象アカウント：\t{unit.account_name} {unit.conversion_original} | {src_rules.FileSystemRights.ToString()}", "conversion");
                             continue; // del_flgが1のものは権限設定処理を行わない
                         }
 
-                        loger_manager.write_log($"変換対象アカウント： {unit.account_name} {unit.conversion_original} → {unit.after_conversion} | {src_rules.FileSystemRights.ToString()}", "conversion");
+                        loger_manager.write_log($"変換対象アカウント：\t{unit.account_name} {unit.conversion_original} → {unit.after_conversion} | {src_rules.FileSystemRights.ToString()}", "conversion");
                         dst_dir_security.AddAccessRule(new FileSystemAccessRule(unit.after_conversion, src_rules.FileSystemRights,
                                                                                 src_rules.InheritanceFlags,src_rules.PropagationFlags,
                                                                                 src_rules.AccessControlType));
                     }
                     else
                     {
-                        loger_manager.write_log($"適応先： {dst_dir.FullName} " + ((src_rules.InheritanceFlags & InheritanceFlags.ContainerInherit) > 0 ? "このフォルダとサブフォルダ" : "このフォルダのみ"), "extracting", "extracting");
-                        loger_manager.write_log($"変換対象外アカウント：{account_name} | {src_rules.FileSystemRights.ToString()}", "extracting", "extracting");
+                        loger_manager.write_log($"適応先：\t{dst_dir.FullName} " + ((src_rules.InheritanceFlags & InheritanceFlags.ContainerInherit) > 0 ? "このフォルダとサブフォルダ" : "このフォルダのみ"), "extracting", "extracting");
+                        loger_manager.write_log($"変換対象外アカウント：\t{account_name} | {src_rules.FileSystemRights.ToString()}", "extracting", "extracting");
                         dst_dir_security.AddAccessRule(src_rules);
                     }
                 }
                 if (dst_dir_security.GetAccessRules(true, true, typeof(NTAccount)).Count > 0)
                     dst_dir.SetAccessControl(dst_dir_security); // アクセス権の設定
                 else
-                    throw new Exception($"アクセス権の設定が無い : {src_dir.FullName}");
+                    throw new Exception($"アクセス権の設定が無い :\t{src_dir.FullName}");
 
                 return true;
             }
@@ -435,15 +435,15 @@ namespace copy_and_authorization_tool
                     }
                     else
                     {
-                        loger_manager.write_log($"適応先： {dst_file.FullName}\t" + ((src_rules.InheritanceFlags & InheritanceFlags.ContainerInherit) > 0 ? "このフォルダとサブフォルダ" : "このフォルダのみ"), "extracting");
-                        loger_manager.write_log($"変換対象外アカウント：{account_name} | {src_rules.FileSystemRights.ToString()}", "extracting");
+                        loger_manager.write_log($"適応先：\t{dst_file.FullName}\t" + ((src_rules.InheritanceFlags & InheritanceFlags.ContainerInherit) > 0 ? "このフォルダとサブフォルダ" : "このフォルダのみ"), "extracting");
+                        loger_manager.write_log($"変換対象外アカウント：\t{account_name} | {src_rules.FileSystemRights.ToString()}", "extracting");
                         dst_file_security.AddAccessRule(src_rules); // 変換対象が無ければ、移管元の権限そのまま移管
                     }
                 }
                 if (dst_file_security.GetAccessRules(true, true, typeof(NTAccount)).Count > 0)
                     dst_file.SetAccessControl(dst_file_security);
                 else
-                    throw new Exception($"アクセス権の設定が無い : {src_file.FullName}");
+                    throw new Exception($"アクセス権の設定が無い :\t{src_file.FullName}");
 
                 return true;
             }
