@@ -119,8 +119,10 @@ namespace tool_commons.modules
         {
             if (_stream == null) return;
 
-            _stream.Close();
+            _stream.Dispose();
             _stream = null;
+            _fl_stream.Dispose();
+            _fl_stream = null;
         }
 
         /// <summary>
@@ -201,6 +203,32 @@ namespace tool_commons.modules
             if ((_output_level & E_LOG_LEVEL.E_USER_LOG) == 0) return;
             string str_category = category.ToUpper();
             write_log(str, str_category);
+        }
+
+        /// <summary>
+        /// 値＋単位からバイト単位を計算する関数
+        /// </summary>
+        /// <param name="str_val">値＋単位　※k~Pまで対応</param>
+        /// <returns></returns>
+        public static ulong calc_to_byte(string str_val)
+        {
+            Dictionary<string, ulong> unit_list = new Dictionary<string, ulong>()
+            {
+                {"K", 1024},
+                {"M", 1048576},
+                {"G", 1073741824},
+                {"T", 1099511627776},
+                {"P", 1125899906842624}
+            };
+
+            string upper_case = str_val.ToUpper();
+            if (!System.Text.RegularExpressions.Regex.IsMatch(upper_case, @"\d{1,}?[KMGTP]{1}$")) return 0;
+            int catpoint = (upper_case.Length - 1);
+            ulong value = ulong.Parse(upper_case.Substring(0, catpoint));
+            string unit = upper_case.Substring(catpoint);
+
+            if (unit_list.ContainsKey(unit)) return value * unit_list[unit];
+            else return 0;
         }
     }
 }
