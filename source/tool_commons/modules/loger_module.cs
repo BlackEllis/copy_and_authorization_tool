@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
@@ -19,6 +20,12 @@ namespace tool_commons.modules
         private E_LOG_LEVEL _output_level;
         private FileStream _fl_stream;
         private StreamWriter _stream;
+        private String _file_name;
+        private String _file_encode;
+        private String _original_filename;
+        private String _original_extension;
+        private int _division_count;
+        private long _max_output_size;
 
         /// <summary>
         /// ログ出力オブジェクトの作成
@@ -27,7 +34,7 @@ namespace tool_commons.modules
         /// <param name="output_dir">出力先ディレクトリ</param>
         /// <param name="file_encode">出力エンコード</param>
         /// <param name="debug_flg"></param>
-        public static loger_module create_loger(string file_name, string output_dir, string file_encode, E_LOG_LEVEL log_level, bool debug_flg = false)
+        public static loger_module create_loger(string file_name, string output_dir, string file_encode, E_LOG_LEVEL log_level, string max_output_capacity, bool debug_flg = false)
         {
             try
             {
@@ -44,7 +51,7 @@ namespace tool_commons.modules
 
                 if (!Directory.Exists(log_dir)) Directory.CreateDirectory(log_dir); // ディレクトが無ければ作成
 
-                return new loger_module(log_file_name, file_encode, log_level);
+                return new loger_module(log_file_name, file_encode, log_level, max_output_capacity);
             }
             catch (Exception e)
             {
@@ -105,11 +112,22 @@ namespace tool_commons.modules
         /// <param name="file_name">ログファイル名</param>
         /// <param name="file_encode">エンコード</param>
         /// <param name="log_level">出力ログレベル</param>
-        loger_module(string file_name, string file_encode, E_LOG_LEVEL log_level)
+        loger_module(string file_name, string file_encode, E_LOG_LEVEL log_level, string max_output_capacity)
         {
             _output_level = log_level;
             _fl_stream = new FileStream(file_name, FileMode.Append, FileAccess.Write, FileShare.Read);
             _stream = new StreamWriter(_fl_stream, Encoding.GetEncoding(file_encode));
+            _file_name = file_name;
+            _file_encode = file_encode;
+
+            int cat_point = file_name.LastIndexOf("."); // 拡張子との区切り文字位置を取得
+            if (cat_point != -1)
+            {
+                _original_filename = file_name.Substring(0, cat_point);
+                _original_extension = file_name.Substring(cat_point);
+                _division_count = 1;
+                _max_output_size = calc_to_byte(max_output_capacity);
+            }
         }
 
         /// <summary>
@@ -142,6 +160,17 @@ namespace tool_commons.modules
 
             try
             {
+                FileInfo file_info = new FileInfo(_file_name);
+                if ((_max_output_size != 0) && (file_info.Length > _max_output_size))
+                {
+                    _stream.Dispose();
+                    _fl_stream.Dispose();
+                    _file_name = $"{_original_filename}_{_division_count}{_original_extension}";
+                    _fl_stream = new FileStream(_file_name, FileMode.Append, FileAccess.Write, FileShare.Read);
+                    _stream = new StreamWriter(_fl_stream, Encoding.GetEncoding(_file_encode));
+                    _division_count++;
+                }
+
                 DateTime dt_obj = DateTime.Now;
                 string write_str = dt_obj.ToString("HH:mm:ss.fff\t");
                 write_str += (!log_category.Equals("")) ? $"[{log_category}]" + ":\t" : "";
@@ -210,9 +239,9 @@ namespace tool_commons.modules
         /// </summary>
         /// <param name="str_val">値＋単位　※k~Pまで対応</param>
         /// <returns></returns>
-        public static ulong calc_to_byte(string str_val)
+        public long calc_to_byte(string str_val)
         {
-            Dictionary<string, ulong> unit_list = new Dictionary<string, ulong>()
+            Dictionary<string, long> unit_list = new Dictionary<string, long>()
             {
                 {"K", 1024},
                 {"M", 1048576},
@@ -221,14 +250,17 @@ namespace tool_commons.modules
                 {"P", 1125899906842624}
             };
 
+            if (str_val.Equals("0")) return 0;
+
             string upper_case = str_val.ToUpper();
-            if (!System.Text.RegularExpressions.Regex.IsMatch(upper_case, @"\d{1,}?[KMGTP]{1}$")) return 0;
+            if (!System.Text.RegularExpressions.Regex.IsMatch(upper_case, @"\d{1,}?[KMGTP]{0,1}$")) return 0;
+
             int catpoint = (upper_case.Length - 1);
-            ulong value = ulong.Parse(upper_case.Substring(0, catpoint));
+            long value = long.Parse(upper_case.Substring(0, catpoint));
             string unit = upper_case.Substring(catpoint);
 
             if (unit_list.ContainsKey(unit)) return value * unit_list[unit];
-            else return 0;
+            else return value;
         }
     }
 }

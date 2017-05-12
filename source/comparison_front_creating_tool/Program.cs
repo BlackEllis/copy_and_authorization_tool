@@ -86,9 +86,13 @@ namespace comparison_front_creating_tool
             extracting_file = utility_tools.get_value_from_hasharray(args, constant.RESOURCES_KEY_EXTRACTINGLOG, extracting_file);
             string extracting_encode = json_module.get_external_resource("error_file_encode", constant.EXTRACTING_FILE_ENCODE);
 
+            string max_output_capacity = json_module.get_external_resource("", "0");
+
             loger_manager.setup_manager();
-            loger_manager.add_stream("info", log_file, log_dir, log_encode, loger_module.E_LOG_LEVEL.E_ALL, debug_flg);
-            loger_manager.add_stream("extracting", extracting_file, log_dir, extracting_encode, loger_module.E_LOG_LEVEL.E_ALL, debug_flg);
+            loger_manager.add_stream("info", log_file, log_dir, log_encode, loger_module.E_LOG_LEVEL.E_ALL,
+                                        json_module.get_external_resource("default_log_filesize", "0"), debug_flg);
+            loger_manager.add_stream("extracting", extracting_file, log_dir, extracting_encode, loger_module.E_LOG_LEVEL.E_ALL,
+                                        json_module.get_external_resource("default_extracting_filesize", "0"), debug_flg);
         }
 
         /// <summary>

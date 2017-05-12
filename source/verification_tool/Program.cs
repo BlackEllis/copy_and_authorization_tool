@@ -118,8 +118,10 @@ namespace verification_tool
             loger_module.E_LOG_LEVEL extracting_output_level = (loger_module.E_LOG_LEVEL)Enum.Parse(typeof(loger_module.E_LOG_LEVEL), wk_extracting_output_level);
 
             loger_manager.setup_manager();
-            loger_manager.add_stream("info", log_file, log_dir, log_encode, log_output_level, debug_flg);
-            loger_manager.add_stream("extracting", extracting_file, log_dir, extracting_encode, extracting_output_level, debug_flg);
+            loger_manager.add_stream("info", log_file, log_dir, log_encode, log_output_level,
+                                        json_module.get_external_resource("default_log_filesize", "0"), debug_flg);
+            loger_manager.add_stream("extracting", extracting_file, log_dir, extracting_encode, extracting_output_level,
+                                        json_module.get_external_resource("default_extracting_filesize", "0"), debug_flg);
         }
 
         /// <summary>

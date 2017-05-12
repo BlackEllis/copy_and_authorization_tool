@@ -17,9 +17,9 @@ namespace tool_commons.modules
             _stream_list = new Dictionary<string, loger_module>();
         }
 
-        public static void add_stream(string stream_name, string file_name, string output_dir, string file_encode, loger_module.E_LOG_LEVEL log_level, bool debug_flg = false)
+        public static void add_stream(string stream_name, string file_name, string output_dir, string file_encode, loger_module.E_LOG_LEVEL log_level, string max_output_capacity="", bool debug_flg = false)
         {
-            loger_module obj = loger_module.create_loger(file_name, output_dir, file_encode, log_level, debug_flg);
+            loger_module obj = loger_module.create_loger(file_name, output_dir, file_encode, log_level, max_output_capacity, debug_flg);
             if (obj == null) return;
             if (_stream_list == null) return;
             if (_stream_list.ContainsKey(stream_name)) return;
