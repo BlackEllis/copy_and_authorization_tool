@@ -439,8 +439,8 @@ namespace copy_and_authorization_tool
                     }
                     else
                     {
-                        loger_manager.write_log($"適応先：\t{dst_file.FullName}\t" + ((src_rules.InheritanceFlags & InheritanceFlags.ContainerInherit) > 0 ? "このフォルダとサブフォルダ" : "このフォルダのみ"), "extracting");
-                        loger_manager.write_log($"変換対象外アカウント：\t{account_name} | {src_rules.FileSystemRights.ToString()}", "extracting");
+                        loger_manager.write_log($"適応先：\t{dst_file.FullName}\t" + ((src_rules.InheritanceFlags & InheritanceFlags.ContainerInherit) > 0 ? "このフォルダとサブフォルダ" : "このフォルダのみ"), "extracting", "extracting");
+                        loger_manager.write_log($"変換対象外アカウント：\t{account_name} | {src_rules.FileSystemRights.ToString()}", "extracting", "extracting");
                         dst_file_security.AddAccessRule(src_rules); // 変換対象が無ければ、移管元の権限そのまま移管
                     }
                 }
