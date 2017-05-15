@@ -248,7 +248,7 @@ namespace comparison_front_creating_tool
                         var users = user_info.get_user_infos(mysql.connection_sql_str(), membar_user.account_name);
                         if ((users == null) || (users.Count == 0)) continue;
 
-                        comparsion_unit unit = new comparsion_unit(membar_user, users[0], membar_user.account_name, destination_domain + users[0].account_name);
+                        comparsion_unit unit = new comparsion_unit(membar_user, users[0], membar_user.sid, destination_domain + users[0].account_name);
                         if (!compari_table.comparsion_units.Contains(unit))
                             compari_table.comparsion_units.Add(unit);
                     }
